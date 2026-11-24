@@ -23,7 +23,7 @@ export function exportIcs(p) {
   const now = stamp(Date.now());
   const events = [];
   const add = (start, hours, summary, desc) => events.push(
-    'BEGIN:VEVENT', `UID:${start}-${events.length}@alltripconsidered`, 'DTSTAMP:' + now,
+    'BEGIN:VEVENT', `UID:${start}-${events.length}@alltripsconsidered.com`, 'DTSTAMP:' + now,
     'DTSTART:' + stamp(start), 'DTEND:' + stamp(start + hours * HOUR_MS),
     'SUMMARY:' + escText(summary), 'DESCRIPTION:' + escText(desc + ' ' + NOTE), 'END:VEVENT');
 
@@ -35,7 +35,7 @@ export function exportIcs(p) {
       `Jet Lag and Recovery: last caffeine ${fmtTime(d.caff.cutoff)}.`);
   }
 
-  const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//All Trip Considered//Jet Lag and Recovery//EN',
+  const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//All Trips Considered//Jet Lag and Recovery//EN',
     'CALSCALE:GREGORIAN', ...events, 'END:VCALENDAR'].join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([body], { type: 'text/calendar' }));

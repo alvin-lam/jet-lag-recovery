@@ -1,6 +1,6 @@
 # Jet Lag and Recovery
 
-By All Trip Considered. A progressive web app (PWA) that helps frequent flyers recover from jet lag. Enter your flight and normal sleep pattern, and it builds a day-by-day plan for sleep, light, caffeine, and hydration.
+By All Trips Considered. A progressive web app (PWA) that helps frequent flyers recover from jet lag. Enter your flight and normal sleep pattern, and it builds a day-by-day plan for sleep, light, caffeine, and hydration.
 
 > **Not health advice.** Jet Lag and Recovery provides general information for educational purposes only. It is not medical, health, or nutritional advice and does not replace a qualified health professional. The app is provided "as is," without warranties, and its creators are not liable for any damages arising from its use. See [Disclaimer](#disclaimer).
 
@@ -85,6 +85,10 @@ js/
 
 The model tracks how far your body clock has shifted toward destination time. It assumes about 1 hour per day when advancing (flying east) and 1.5 hours per day when delaying (flying west), adjusted for chronotype and the pace you choose. For very large gaps it picks the shorter direction around the clock. Light advice is timed around the core body temperature minimum, about 3 hours before your body's natural wake time. These are simplified population averages, and individual responses vary.
 
+## Roadmap
+
+Planned work, from launch checks to new features, is tracked in [ROADMAP.md](ROADMAP.md).
+
 ## Run locally
 
 No build step or dependencies. Serve the folder over HTTP, because ES modules and the service worker do not load from `file://`:
@@ -104,6 +108,6 @@ Any static host works, including GitHub Pages. Publish the repository root.
 
 Jet Lag and Recovery and its content are for general informational and educational purposes only. Nothing in the app is medical, health, nutritional, or professional advice, and using it does not create a doctor and patient relationship. Always consult a qualified health professional before changing your sleep schedule, caffeine or fluid intake, or before taking melatonin or any other supplement or medication. The app is not for emergencies.
 
-The app is provided "as is" and "as available," without warranties of any kind, express or implied. To the fullest extent permitted by law, All Trip Considered and its creators, contributors, and affiliates are not liable for any direct, indirect, incidental, special, consequential, or punitive damages, or for any injury, illness, loss, or cost, arising from or related to use of, or reliance on, the app or its content. You use the app at your own risk.
+The app is provided "as is" and "as available," without warranties of any kind, express or implied. To the fullest extent permitted by law, All Trips Considered and its creators, contributors, and affiliates are not liable for any direct, indirect, incidental, special, consequential, or punitive damages, or for any injury, illness, loss, or cost, arising from or related to use of, or reliance on, the app or its content. You use the app at your own risk.
 
-© All Trip Considered. All rights reserved.
+© All Trips Considered. All rights reserved.
