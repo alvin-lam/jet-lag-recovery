@@ -1,6 +1,7 @@
 // Entry point: wires the store, the model and the views together.
 import { $, DAY_MS, debounce } from './lib/util.js';
 import { deviceTimeZone, localDateStr } from './lib/time.js';
+import { devicePrefs } from './lib/locale.js';
 import { locationForTz, migrateKey, parseLoc } from './data/locations.js';
 import { store, setTrip, resetTrip, saveTripNow, nightsFor } from './state.js';
 import { buildPlan, tripSignature } from './core/model.js';
@@ -36,6 +37,12 @@ function fillDeviceDefaults() {
     if (parseLoc(patch.dest).tz === home.tz) patch.dest = 'code:HND';
   }
   if (!t.depDate) patch.depDate = localDateStr(deviceTz, Date.now() + 7 * DAY_MS);
+  // Body weight starts in the device's unit: 154 lb in the US, 70 kg elsewhere.
+  if (!t.weightUnit || !t.weight) {
+    const lb = devicePrefs().imperial;
+    patch.weightUnit = lb ? 'lb' : 'kg';
+    patch.weight = lb ? 154 : 70;
+  }
   if (Object.keys(patch).length) setTrip(patch);
 }
 

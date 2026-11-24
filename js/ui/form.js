@@ -2,6 +2,7 @@
 import { $, $$ } from '../lib/util.js';
 import { createLocationPicker } from './location-picker.js';
 import { store, setTrip } from '../state.js';
+import { devicePrefs } from '../lib/locale.js';
 
 const NUMERIC = new Set(['durH', 'durM', 'tripDays', 'cups', 'weight', 'alcohol', 'preDays', 'pace']);
 const RADIOS = ['chrono', 'caffSens'];
@@ -16,6 +17,11 @@ export function setupForm({ onChange }) {
     getKey: () => store.trip[field],
     onSelect: (key) => { setTrip({ [field]: key }); onChange(); },
   }));
+
+  // Name what "Device setting" resolves to, for example "Device setting (24-hour)".
+  const device = devicePrefs();
+  $('#clock option[data-device]').textContent = `Device setting (${device.hour12 ? '12-hour' : '24-hour'})`;
+  $('#volUnit option[data-device]').textContent = `Device setting (${device.imperial ? 'ounces' : 'liters'})`;
 
   const handle = (e) => {
     const t = e.target;

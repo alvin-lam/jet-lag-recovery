@@ -1,8 +1,7 @@
 // 24-hour timeline bars drawn with absolutely positioned spans (no canvas, no SVG, prints cleanly).
 import { esc, mod24 } from '../lib/util.js';
 import { toDayPieces } from '../lib/intervals.js';
-import { store } from '../state.js';
-import { fmtTime } from './format.js';
+import { fmtTime, uses24h } from './format.js';
 
 const pct = (h) => (h / 24) * 100;
 
@@ -23,7 +22,7 @@ export function lightBars(light) {
 }
 
 function axis() {
-  const end = store.trip.clock === '24' ? '24:00' : '12 am';
+  const end = uses24h() ? '24:00' : '12 am';
   return '<div class="axis">' + [0, 6, 12, 18, 24].map((t) =>
     `<span style="left:${pct(t)}%">${t === 24 ? end : fmtTime(t)}</span>`).join('') + '</div>';
 }

@@ -14,9 +14,17 @@ function pick(defaults, saved) {
 
 // One-time upgrades for settings saved by earlier versions.
 function upgradeTrip(saved) {
-  if (saved && typeof saved === 'object' && !(saved.v >= 2)) {
-    saved.clock = '24'; // v2: the 24-hour clock became the default
-    saved.v = 2;
+  if (!saved || typeof saved !== 'object') return saved;
+  if (!(saved.v >= 3)) {
+    // v3: time and units follow the device. Settings that still hold an earlier default switch to
+    // the device; a choice the user changed away from the default is kept.
+    if (saved.clock !== '12') saved.clock = 'auto';
+    if (saved.volUnit !== 'imperial') saved.volUnit = 'auto';
+    if (saved.weightUnit !== 'lb' && (saved.weight === undefined || saved.weight === 70)) {
+      saved.weight = null; // untouched default weight: refill in the device's unit
+      saved.weightUnit = null;
+    }
+    saved.v = 3;
   }
   return saved;
 }

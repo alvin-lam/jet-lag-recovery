@@ -98,6 +98,8 @@ function dayCard(p, d, today, nowHour) {
 
   const sleepLine = d.lateArrival
     ? `Land at ${fmtTime(p.arrHour)}. Head to bed as soon as you can, around <strong>${fmtTime(d.bed)}</strong>, and wake at <strong>${fmtTime(d.wake)}</strong>.`
+    : d.arrivalSleep
+    ? `Land at ${fmtTime(p.arrHour)}. Sleep from about <strong>${fmtRange(d.arrivalSleep[0], d.arrivalSleep[1])}</strong>, then start your day. Go to bed tonight at <strong>${fmtTime(d.bed)}</strong>.`
     : (d.arrivalDay
       ? `Land at ${fmtTime(p.arrHour)}. Go to bed at <strong>${fmtTime(d.bed)}</strong>.`
       : `Wake at <strong>${fmtTime(d.wake)}</strong>. Go to bed at <strong>${fmtTime(d.bed)}</strong>.`)
@@ -122,6 +124,7 @@ function dayCard(p, d, today, nowHour) {
       <span class="day-tag">${tag}</span></div>
     ${timeline({
       sleep: bar('sleep', d.bed, d.bed + d.night, 'Sleep')
+        + (d.arrivalSleep ? bar('sleep', d.arrivalSleep[0], d.arrivalSleep[1], 'Sleep after landing') : '')
         + (d.melatonin !== null ? marker('mel', d.melatonin, 'Melatonin') : '')
         + (isToday ? marker('now', nowHour, 'Now') : ''),
       light: lightBars(d.light),

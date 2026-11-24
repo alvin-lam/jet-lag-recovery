@@ -230,8 +230,18 @@ export function buildPlan(trip, nights = {}) {
       bed = homeBed + off; wake = homeWake + off;
     }
 
-    // Landing near or after bedtime: sleep soon after reaching the hotel.
-    const lateArrival = arrivalDay && mod24(arrHour - bed) < 6;
+    // Landing from an hour before bedtime through the planned night, with at least 3 hours of it left:
+    // sleep soon after reaching the hotel. Landing nearer the end of the night (for example 6:30 am with
+    // a 9 am wake) starts a new day instead, so tonight's bedtime stands.
+    const sinceEvening = mod24(arrHour - (bed - 1));
+    const landsAtNight = arrivalDay
+      && sinceEvening < mod24(wake - (bed - 1)) // lands between an hour before bed and wake time
+      && mod24(wake - arrHour) >= 3;            // with at least 3 hours of the night left
+    // Evening landing: tonight's bedtime moves to soon after landing.
+    // After-midnight landing: sleep from soon after landing until wake time, then the day runs as usual.
+    let arrivalSleep = null;
+    if (landsAtNight && arrHour + 1 < wake) arrivalSleep = [arrHour + 1, wake];
+    const lateArrival = landsAtNight && !arrivalSleep;
     if (lateArrival) bed = arrHour + 1;
 
     // A logged night nudges the body clock estimate by half the deviation from plan.
@@ -259,7 +269,7 @@ export function buildPlan(trip, nights = {}) {
 
     days.push({
       k, date: addDays(arrDate, k - 1), bed, wake, night, behind,
-      arrivalDay, lateArrival, isAdjusted, log, logged,
+      arrivalDay, lateArrival, arrivalSleep, isAdjusted, log, logged,
       light,
       seek: light ? awakeLight(light.seek, bed, night, arrivalDay ? arrHour : null) : [],
       avoid: light ? awakeLight(light.avoid, bed, night, arrivalDay ? arrHour : null) : [],
