@@ -133,6 +133,8 @@
 
 /* ========== Base ========== */
 *, *::before, *::after { box-sizing: border-box; }
+/* The hidden attribute always wins, even over components that set their own display (such as round buttons). */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
