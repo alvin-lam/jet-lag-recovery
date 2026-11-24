@@ -13,7 +13,7 @@ By All Trip Considered. A progressive web app (PWA) that helps frequent flyers r
 - **Adjustable output:** choose a strategy (gradual, immediate, or stay on home time), pre-adjust up to 3 days before departure, and set the adjustment pace.
 - **Hydration estimates:** a daily water estimate based on weight, activity, climate, and alcohol, plus in-flight intake. Metric or imperial.
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
-- **Calendar export** (`.ics`) and print.
+- **Calendar export** (`.ics`). Times display in 24-hour format by default, with a 12-hour option.
 - **Appearance menu** (palette icon in the header): light, dark, or system mode, plus season and holiday themes chosen from rows of emoji icons (✨ Automatic, each theme such as Winter ❄️ or Pride Month 🏳️‍🌈, and 🚫 None). Hovering shows each name, and the current choice is named above each row. Pride Month runs through June. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
 - **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. Setting both season and holiday to None turns decorations off. Animation stops when the device asks for reduced motion.
 - **Back to top** button in the lower right once you scroll past the header.
@@ -37,6 +37,7 @@ sw.js                    Service worker (offline cache)
 css/
   styles.css             Theme tokens, season and holiday palettes, layout, decorations
 assets/icons/            App icons (SVG source and generated PNGs)
+assets/fonts/            Instrument Serif for the title and copyright (SIL Open Font License, see OFL.txt)
 js/
   main.js                Entry point: wires state, model, and views
   config.js              Defaults, storage keys, and all model constants

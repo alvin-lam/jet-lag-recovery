@@ -12,8 +12,17 @@ function pick(defaults, saved) {
   return out;
 }
 
+// One-time upgrades for settings saved by earlier versions.
+function upgradeTrip(saved) {
+  if (saved && typeof saved === 'object' && !(saved.v >= 2)) {
+    saved.clock = '24'; // v2: the 24-hour clock became the default
+    saved.v = 2;
+  }
+  return saved;
+}
+
 export const store = {
-  trip: pick(TRIP_DEFAULTS, load(STORAGE_KEYS.trip, null)),
+  trip: pick(TRIP_DEFAULTS, upgradeTrip(load(STORAGE_KEYS.trip, null))),
   // Sleep logs: { sig: trip signature, nights: { [dayNumber]: { bed: 'HH:MM', wake: 'HH:MM' } } }
   checkins: load(STORAGE_KEYS.checkins, { sig: '', nights: {} }),
   appearance: pick(APPEARANCE_DEFAULTS, load(STORAGE_KEYS.appearance, null)),

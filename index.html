@@ -13,6 +13,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Jet Lag &amp; Recovery">
   <meta name="application-name" content="Jet Lag and Recovery">
+  <link rel="preload" href="assets/fonts/instrument-serif-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/styles.css">
   <script>
     // Apply saved appearance before first paint to avoid a theme flash.
@@ -198,8 +199,8 @@
             <label class="field">
               <span>Clock</span>
               <select id="clock" name="clock">
-                <option value="12">12-hour</option>
                 <option value="24">24-hour</option>
+                <option value="12">12-hour</option>
               </select>
             </label>
             <label class="field">
@@ -212,7 +213,7 @@
           </div>
         </fieldset>
         <div class="form-actions">
-          <button type="button" id="reset-btn" class="btn btn-ghost">Reset to defaults</button>
+          <button type="button" id="reset-btn" class="btn btn-ghost">Reset</button>
         </div>
       </form>
     </section>
@@ -246,7 +247,6 @@
         <div id="days"></div>
         <div class="pane-actions">
           <button type="button" id="ics-btn" class="btn">Add sleep times to calendar (.ics)</button>
-          <button type="button" id="print-btn" class="btn btn-ghost">Print plan</button>
         </div>
       </div>
       <div id="pane-flight" role="tabpanel" aria-labelledby="tab-flight" class="pane" hidden></div>
@@ -269,7 +269,7 @@
       Not health or medical advice. Provided as is, without warranties. Use at your own risk.
       <button type="button" class="link-btn" data-open-legal>Disclaimer and limitation of liability</button>
     </p>
-    <p>
+    <p class="copyright">
       &copy; <span id="year">2026</span>
       <a href="https://alltripsconsidered.com" target="_blank" rel="noopener">All Trip Considered</a>.
       All rights reserved.

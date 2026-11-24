@@ -16,7 +16,8 @@ export const TRIP_DEFAULTS = Object.freeze({
   bed: '23:00', wake: '07:00', chrono: 'neutral',
   caffSens: 'normal', cups: 2, weight: 70, weightUnit: 'kg',
   activity: 'moderate', climate: 'temperate', alcohol: 0,
-  strategy: 'auto', preDays: 0, pace: 1, clock: '12', volUnit: 'metric',
+  strategy: 'auto', preDays: 0, pace: 1, clock: '24', volUnit: 'metric',
+  v: 2, // settings version, used for one-time upgrades of saved settings (see state.js)
 });
 
 // Decorations follow the active season or holiday automatically, so only these choices are stored.

@@ -70,7 +70,6 @@ function init() {
     render();
   });
   $('#ics-btn').addEventListener('click', () => plan && exportIcs(plan));
-  $('#print-btn').addEventListener('click', () => window.print());
 
   setupCheckin({ getPlan: () => plan, onChange: render });
   setupTabs();

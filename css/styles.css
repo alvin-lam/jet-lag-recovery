@@ -161,16 +161,28 @@ small { color: var(--muted); font-weight: 400; }
 }
 
 /* ========== Header / footer ========== */
+/* Instrument Serif (SIL Open Font License, see assets/fonts/OFL.txt), bundled so it works offline. */
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('../assets/fonts/instrument-serif-latin.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+:root { --font-display: 'Instrument Serif', 'Iowan Old Style', Georgia, 'Times New Roman', serif; }
+
 .site-header { padding: 18px 16px 6px; position: relative; z-index: 2; }
 .header-inner {
   max-width: 1200px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
+.site-title { min-width: 0; }
 .site-title a {
   display: inline-flex; align-items: center; gap: 10px;
   color: var(--text); text-decoration: none;
-  font-size: clamp(1.35rem, 2.6vw + .6rem, 2rem); font-weight: 750; letter-spacing: -.01em;
+  font-family: var(--font-display); font-weight: 400; font-synthesis: none;
+  font-size: clamp(1.9rem, 3vw + 1rem, 2.75rem); letter-spacing: 0; line-height: 1.05;
 }
+.site-title img { flex: none; }
+.header-actions { flex: none; }
 .site-title a:hover { filter: none; }
 .site-title a:hover span { color: var(--accent); }
 .header-actions { display: flex; gap: 8px; }
@@ -182,6 +194,8 @@ small { color: var(--muted); font-weight: 400; }
   border-top: 1px solid var(--border); position: relative; z-index: 2; background: var(--bg);
 }
 .site-footer p { margin: 0; }
+.copyright { font-family: var(--font-display); font-size: 1.2rem; font-synthesis: none; color: var(--text); }
+.copyright a { font-weight: 400; }
 
 /* ========== Layout ========== */
 .layout {
@@ -231,13 +245,20 @@ legend {
 .opt-code { font-weight: 800; letter-spacing: .06em; font-size: .85rem; }
 .opt-sub { font-size: .8rem; color: var(--muted); }
 .opt-empty { padding: 10px; font-size: .88rem; color: var(--muted); }
-.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* Side-by-side fields: controls sit on one baseline even if one label wraps. */
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+.row-2 > .field { justify-content: flex-end; }
 input[type="date"], input[type="time"], input[type="number"], select {
-  font: inherit; font-size: 16px; color: var(--text); background: var(--surface-2);
+  font: inherit; font-size: 16px; line-height: 1.25; color: var(--text); background-color: var(--surface-2);
   border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 9px 10px; width: 100%; min-height: 44px; min-width: 0;
+  padding: 0 10px; width: 100%; height: 44px; min-width: 0;
 }
-input[type="range"] { width: 100%; accent-color: var(--accent); min-height: 30px; }
+/* Native date and time widgets otherwise render taller than other inputs on some browsers. */
+input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; display: block; }
+input::-webkit-date-and-time-value { text-align: left; }
+input::-webkit-datetime-edit { padding: 0; }
+.combo input { height: 44px; min-height: 0; padding-top: 0; padding-bottom: 0; }
+input[type="range"] { display: block; width: 100%; margin: 0; accent-color: var(--accent); height: 30px; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 output { font-weight: 700; color: var(--accent); }
 .hint { font-size: .88rem; color: var(--muted); margin: 4px 0 0; }
@@ -279,7 +300,10 @@ output { font-weight: 700; color: var(--accent); }
 /* ========== Summary ========== */
 .summary h3 { font-size: 1.25rem; margin-bottom: 4px; }
 .summary .route { color: var(--muted); margin: 0 0 14px; }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+/* Four stat cards: one row of four when there is room, otherwise two by two (never three plus an orphan). */
+.summary { container-type: inline-size; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@container (min-width: 600px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
 .stat .k { font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 650; }
 .stat .v { font-size: 1.25rem; font-weight: 750; }
@@ -462,6 +486,13 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
   .header-actions .btn:not(.round-btn) { padding: 8px 12px; }
   .tabs { display: grid; grid-template-columns: 1fr 1fr; border-radius: 18px; }
   .tabs [role="tab"] { border-radius: 14px; }
+}
+/* Very narrow phones: stack paired fields so dates and times are not cut off. */
+@media (max-width: 379px) {
+  .row-2 { grid-template-columns: 1fr; gap: 0; }
+  .site-header { padding-top: 14px; }
+  .site-title a { gap: 8px; }
+  .site-title img { width: 30px; height: 30px; }
 }
 
 /* ========== Print ========== */
