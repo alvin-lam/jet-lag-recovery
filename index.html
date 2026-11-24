@@ -231,6 +231,13 @@
             <span>Usual caffeinated drinks per day: <output id="cups-out" for="cups"></output></span>
             <input type="range" id="cups" name="cups" min="0" max="6" step="1">
           </label>
+          <label class="field">
+            <span>Alcoholic drinks per day on this trip: <output id="alcohol-out" for="alcohol"></output></span>
+            <input type="range" id="alcohol" name="alcohol" min="0" max="5" step="1">
+          </label>
+          <details id="water-personal" class="optional">
+            <summary>Personalize my water target <small>(optional)</small></summary>
+            <p class="hint" id="water-personal-hint"></p>
           <div class="row-2">
             <label class="field">
               <span>Body weight</span>
@@ -262,10 +269,8 @@
               </select>
             </label>
           </div>
-          <label class="field">
-            <span>Alcoholic drinks per day on this trip: <output id="alcohol-out" for="alcohol"></output></span>
-            <input type="range" id="alcohol" name="alcohol" min="0" max="5" step="1">
-          </label>
+            <button type="button" id="water-standard" class="btn btn-ghost btn-sm">Use standard advice</button>
+          </details>
         </fieldset>
 
         <fieldset>

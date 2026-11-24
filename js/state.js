@@ -26,6 +26,15 @@ function upgradeTrip(saved) {
     }
     saved.v = 3;
   }
+  if (!(saved.v >= 4)) {
+    // v4: body weight, activity and climate became optional. Travelers who had changed them from the
+    // defaults keep their personalized water target; everyone else gets the standard advice.
+    const w = Number(saved.weight);
+    saved.personalWater = (w > 0 && w !== 70 && w !== 154)
+      || (saved.activity && saved.activity !== 'moderate')
+      || (saved.climate && saved.climate !== 'temperate');
+    saved.v = 4;
+  }
   return saved;
 }
 

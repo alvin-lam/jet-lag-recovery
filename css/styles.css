@@ -544,3 +544,21 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
 .check-row input { width: 20px; height: 20px; }
 .preview-note { margin: 0; }
 #ret-days { display: flex; flex-direction: column; gap: 12px; }
+
+/* Optional, collapsible form sections */
+details.optional { margin: 4px 0 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); }
+details.optional > summary {
+  cursor: pointer; list-style: none; padding: 10px 12px; font-size: .92rem; font-weight: 600; min-height: 44px;
+  display: flex; align-items: center; gap: 8px;
+}
+details.optional > summary::-webkit-details-marker { display: none; }
+details.optional > summary::before {
+  content: ''; width: 8px; height: 8px; flex: none; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+  transform: rotate(-45deg); transition: transform .15s; margin-right: 2px;
+}
+details.optional[open] > summary::before { transform: rotate(45deg); }
+details.optional > :not(summary) { margin-left: 12px; margin-right: 12px; }
+details.optional > .hint { margin-top: 0; margin-bottom: 10px; }
+details.optional > .btn { margin-bottom: 12px; }
+details.optional input[type="number"], details.optional select { background-color: var(--surface); }
+@media (prefers-reduced-motion: reduce) { details.optional > summary::before { transition: none; } }

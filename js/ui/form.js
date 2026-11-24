@@ -7,6 +7,7 @@ import { addDays } from '../lib/time.js';
 
 const NUMERIC = new Set(['durH', 'durM', 'tripDays', 'cups', 'weight', 'alcohol', 'preDays', 'pace', 'retDurH', 'retDurM']);
 const RADIOS = ['chrono', 'caffSens'];
+const PERSONAL = new Set(['weight', 'weightUnit', 'activity', 'climate']); // the optional water details
 const KG_PER_LB = 0.4536;
 
 let pickers = [];
@@ -35,6 +36,8 @@ export function setupForm({ onChange }) {
     }
     if (v === store.trip[t.name]) return; // input and change both fire; skip duplicates
     const patch = { [t.name]: v };
+    // Touching any water detail turns on the personalized water target.
+    if (PERSONAL.has(t.name)) patch.personalWater = true;
     if (t.name === 'weightUnit') {
       patch.weight = Math.round(v === 'lb' ? store.trip.weight / KG_PER_LB : store.trip.weight * KG_PER_LB);
       $('#weight').value = patch.weight;
@@ -50,6 +53,13 @@ export function setupForm({ onChange }) {
     updateOutputs();
     onChange();
   };
+  $('#water-standard').addEventListener('click', () => {
+    setTrip({ personalWater: false });
+    $('#water-personal').open = false;
+    updateOutputs();
+    onChange();
+  });
+
   const form = $('#trip-form');
   form.addEventListener('input', handle);
   form.addEventListener('change', handle);
@@ -66,6 +76,7 @@ export function writeForm() {
   }
   for (const name of RADIOS) for (const r of $$(`input[name="${name}"]`)) r.checked = r.value === t[name];
   for (const p of pickers) p.sync();
+  $('#water-personal').open = !!t.personalWater; // start expanded only when already personalized
   updateOutputs();
 }
 
@@ -77,4 +88,8 @@ function updateOutputs() {
   const pace = Number(t.pace);
   $('#pace-out').textContent = pace < 0.75 ? 'Gentle' : pace < 1 ? 'Easy' : pace === 1 ? 'Standard' : pace <= 1.25 ? 'Brisk' : 'Aggressive';
   $('#ret-fields').hidden = !t.ret;
+  $('#water-personal-hint').textContent = t.personalWater
+    ? 'Your water target uses these details.'
+    : 'Using standard advice for adults. Change any field below to personalize your water target.';
+  $('#water-standard').hidden = !t.personalWater;
 }

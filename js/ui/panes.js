@@ -42,8 +42,11 @@ export function renderWater(p) {
   const t = store.trip;
   const full = p.days[1] || p.days[0]; // a full day, not the partial arrival day
   const w = full.water;
-  const weight = Math.round(t.weightUnit === 'lb' ? p.weightKg / 0.4536 : p.weightKg);
   const alcohol = Number(t.alcohol);
+  const drinks = alcohol ? `${alcohol} alcoholic drink${alcohol > 1 ? 's' : ''} a day` : '';
+  const basis = p.weightKg
+    ? `An estimate based on ${Math.round(t.weightUnit === 'lb' ? p.weightKg / 0.4536 : p.weightKg)} ${esc(t.weightUnit)} body weight, ${LABELS.activity[t.activity]} activity, a ${LABELS.climate[t.climate]} climate${drinks ? ', and ' + drinks : ''}.`
+    : `A standard estimate for adults${drinks ? ', plus extra for ' + drinks : ''}. Drink more if it is hot or you are active, or personalize it in the form under "Personalize my water target."`;
   const rows = p.days.map((d) => `<tr><td>${esc(fmtDate(d.date))}</td><td>${fmtVolShort(d.water.base)}</td>
     <td>${d.water.flight ? fmtVolShort(d.water.flight) : '—'}</td><td><strong>${fmtVol(d.water.base + d.water.flight)}</strong></td></tr>`).join('');
 
@@ -51,7 +54,7 @@ export function renderWater(p) {
     ${card('💧 Daily target', `<p class="big-num">${fmtVol(w.base)}</p>
       <div class="water-bar" aria-hidden="true"><i style="width:${clamp((w.base / 5000) * 100, 5, 100)}%"></i></div>
       <p>About <strong>${w.glasses} glasses</strong> of ${fmtVolShort(MODEL.glassMl)} each, from all drinks and water-rich foods.</p>
-      <p class="hint">An estimate based on ${weight} ${esc(t.weightUnit)} body weight, ${LABELS.activity[t.activity]} activity, a ${LABELS.climate[t.climate]} climate${alcohol ? `, and ${alcohol} alcoholic drink${alcohol > 1 ? 's' : ''} a day` : ''}. People with heart or kidney conditions, or on fluid limits, should follow their doctor's guidance instead.</p>`)}
+      <p class="hint">${basis} People with heart or kidney conditions, or on fluid limits, should follow their doctor's guidance instead.</p>`)}
     ${card('⏰ Suggested times on a full day', `<p>${w.times.slice(0, 12).map(fmtTime).join(', ')}</p>
       <p class="hint">Front-load water in the morning and slow down 90 minutes before bed so you are not woken up.</p>`)}
     ${card('✅ Am I hydrated?', list([

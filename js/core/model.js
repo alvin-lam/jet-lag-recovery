@@ -167,14 +167,19 @@ export function buildPlan(trip, nights = {}, opts = {}) {
 
   // Per-person constants, computed once for every day.
   const caffCut = MODEL.caffeineCutoff[trip.caffSens] || MODEL.caffeineCutoff.normal;
-  const weightKg = trip.weightUnit === 'lb' ? Number(trip.weight) * 0.4536 : Number(trip.weight);
+  // Body weight, activity and climate are optional. Until the traveler personalizes them, the plan uses
+  // standard adult advice: a typical daily water target and the usual 400 mg caffeine limit.
+  const personal = !!trip.personalWater && Number(trip.weight) > 0;
+  const weightKg = personal ? (trip.weightUnit === 'lb' ? Number(trip.weight) * 0.4536 : Number(trip.weight)) : null;
   const maxMg = trip.caffSens === 'high'
     ? MODEL.caffeineMaxMgSensitive
-    : Math.min(MODEL.caffeineMaxMg, Math.round((weightKg * MODEL.caffeineMgPerKg) / 10) * 10);
+    : personal
+      ? Math.min(MODEL.caffeineMaxMg, Math.round((weightKg * MODEL.caffeineMgPerKg) / 10) * 10)
+      : MODEL.caffeineMaxMg;
   const cups = Math.min(Number(trip.cups) || 0, Math.floor(maxMg / MODEL.mgPerCup));
-  const dailyMl = weightKg * MODEL.waterMlPerKg
-    + (MODEL.waterActivityMl[trip.activity] || 0)
-    + (MODEL.waterClimateMl[trip.climate] || 0)
+  const dailyMl = (personal
+    ? weightKg * MODEL.waterMlPerKg + (MODEL.waterActivityMl[trip.activity] || 0) + (MODEL.waterClimateMl[trip.climate] || 0)
+    : MODEL.waterStandardMl)
     + (Number(trip.alcohol) || 0) * MODEL.waterPerAlcoholMl;
 
   // ---------- Before departure (home time) ----------

@@ -12,7 +12,7 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 - **Sleep check-ins:** log how you actually slept. The rest of the plan shifts to match your real progress.
 - **Return trip planning (Preview):** add a return flight to get a plan for coming home. It starts from where your body clock is on the return day, so a fully adjusted trip reverses the whole shift, a short trip only undoes part of it, and a trip kept on home time needs little recovery. Sleep logs and calendar export work for both legs.
 - **Adjustable output:** choose a strategy (gradual, immediate, or stay on home time), pre-adjust up to 3 days before departure, and set the adjustment pace.
-- **Hydration estimates:** a daily water estimate based on weight, activity, climate, and alcohol, plus in-flight intake. Metric or imperial.
+- **Hydration estimates:** a standard daily water estimate for adults, adjusted for alcohol, plus in-flight intake. Body weight, activity, and destination climate are optional, under a collapsed "Personalize my water target" section, and refine the target only when filled in. Metric or imperial.
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
 - **Calendar export** (`.ics`).
 - **Device defaults:** the clock (12- or 24-hour), water units, and body weight unit follow the device's region settings, for example 12-hour, ounces, and pounds in the US, and 24-hour, liters, and kilograms in most other places. Dates use the region's date order in English ("Wed, Dec 2" in the US, "Tue 1 Dec" in the UK). The Clock and Water units menus offer "Device setting" plus fixed choices, and Reset returns to the device defaults.
