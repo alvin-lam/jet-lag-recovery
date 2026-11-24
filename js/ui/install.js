@@ -3,7 +3,7 @@
 //   - Safari on iPhone and iPad (and every iOS browser) has no install prompt. People must use
 //     Share, then Add to Home Screen, so we remind them how.
 //   - Android browsers without the prompt (such as Firefox) install from their menu.
-//   - Safari on a Mac installs with File, then Add to Dock.
+//   - Desktop browsers without the prompt (Safari on a Mac, Firefox) get no reminder or icon.
 // The reminder banner appears once, and again only after NAG_DAYS if dismissed. The header
 // download icon stays available whenever installing is possible.
 import { $ } from '../lib/util.js';
@@ -37,15 +37,6 @@ const MANUAL = {
       'Confirm. Jet Lag &amp; Recovery appears on your Home screen as <strong>Jet Lag</strong> and works offline.',
     ],
   },
-  mac: {
-    title: 'Add to Dock',
-    banner: 'In the menu bar, choose <strong>File</strong>, then <strong>Add to Dock</strong>.',
-    steps: [
-      'In the Safari menu bar, choose <strong>File</strong>.',
-      'Choose <strong>Add to Dock</strong>, then <strong>Add</strong>.',
-      'Jet Lag &amp; Recovery opens from your Dock like any other app and works offline.',
-    ],
-  },
 };
 
 function detectPlatform() {
@@ -53,7 +44,6 @@ function detectPlatform() {
   // iPadOS reports itself as a Mac, so check for touch support too.
   if (/iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
   if (/Android/.test(ua)) return 'android';
-  if (/Macintosh/.test(ua) && /Version\/\d+.*Safari\//.test(ua) && !/Chrome|Chromium|Edg\/|Firefox|OPR\//.test(ua)) return 'mac';
   return 'other';
 }
 
@@ -137,7 +127,7 @@ export function setupInstall() {
 
   if (isInstalled()) return hideAll();
   // Browsers with no install prompt get the manual reminder. On Android, wait briefly in case the
-  // browser does support the prompt; iPhone, iPad and Mac Safari never fire it.
-  if (platform === 'ios' || platform === 'mac') offer(platform);
+  // browser does support the prompt; iPhone and iPad never fire it.
+  if (platform === 'ios') offer('ios');
   else if (platform === 'android') setTimeout(() => { if (!deferred) offer('android'); }, PROMPT_WAIT_MS);
 }
