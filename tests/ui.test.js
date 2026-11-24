@@ -201,7 +201,9 @@ test('Travel Tools: list on phones, square buttons on desktop', async () => {
     const { page, ctx } = await openApp(browser, server.url, { trip: NY_LONDON, context });
     const links = await page.$$eval('.travel-tools a', (a) => a.map((x) => [x.textContent.trim(), x.href]));
     assert.equal(links.length, 5);
-    assert.deepEqual(links[0], ['💤Jet Lag', 'https://jetlag.alltripsconsidered.com/']);
+    assert.deepEqual(links[0], ['💤Jet LagYou are here', 'https://jetlag.alltripsconsidered.com/']);
+    assert.equal(await page.$eval('.you-are-here', (e) => e.innerText), 'YOU ARE HERE');
+    assert.equal((await page.$$('.you-are-here')).length, 1);
     const s = await page.$eval('.travel-tools a', (a) => ({ r: getComputedStyle(a).borderTopLeftRadius, d: getComputedStyle(a.closest('ul')).display }));
     assert.equal(s.d, wide ? 'flex' : 'block');
     if (wide) assert.equal(s.r, '0px');

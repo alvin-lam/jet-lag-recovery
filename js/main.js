@@ -14,6 +14,7 @@ import { fmtDate, fmtTime } from './ui/format.js';
 import { setupCheckin } from './ui/checkin.js';
 import { exportIcs } from './ui/ics.js';
 import { setupAppearance } from './ui/appearance.js';
+import { setupTravelTools } from './ui/travel-tools.js';
 import { setupLegal } from './ui/legal.js';
 import { setupToTop } from './ui/to-top.js';
 import { setupInstall } from './ui/install.js';
@@ -107,6 +108,7 @@ function init() {
   setupCheckin({ getPlan: (leg) => (leg === 'return' ? back : plan), onChange: render });
   setupTabs();
   setupAppearance();
+  setupTravelTools();
   setupLegal();
   setupToTop();
   setupPwa();
