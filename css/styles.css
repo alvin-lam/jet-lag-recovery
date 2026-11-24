@@ -147,7 +147,9 @@ body {
   display: flex;
   flex-direction: column;
 }
-a { color: var(--accent); }
+/* Links have no underline; color and weight set them apart, and hover darkens them. */
+a { color: var(--accent); text-decoration: none; font-weight: 600; }
+a:hover { filter: brightness(.85); }
 h1, h2, h3 { line-height: 1.2; margin: 0; }
 h2 { font-size: 1.2rem; }
 h3 { font-size: 1.02rem; }
@@ -169,7 +171,7 @@ small { color: var(--muted); font-weight: 400; }
   color: var(--text); text-decoration: none;
   font-size: clamp(1.35rem, 2.6vw + .6rem, 2rem); font-weight: 750; letter-spacing: -.01em;
 }
-.site-title a span { border-bottom: 3px solid var(--accent-2); }
+.site-title a:hover { filter: none; }
 .site-title a:hover span { color: var(--accent); }
 .header-actions { display: flex; gap: 8px; }
 .tagline { max-width: 1200px; margin: 6px auto 0; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; }
@@ -372,7 +374,7 @@ table.water th { color: var(--muted); font-weight: 650; font-size: .8rem; text-t
 }
 .link-btn {
   font: inherit; font-weight: 650; color: var(--accent); background: none; border: 0; padding: 0;
-  text-decoration: underline; cursor: pointer;
+  text-decoration: none; cursor: pointer;
 }
 /* Season and holiday icon pickers */
 .icon-pick { margin: 6px 0 12px; }
