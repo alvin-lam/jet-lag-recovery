@@ -210,3 +210,16 @@ test('Travel Tools: list on phones, square buttons on desktop', async () => {
     await ctx.close();
   }
 });
+
+test('update banner offers a refresh', async () => {
+  const { page, ctx, errors } = await openApp(browser, server.url, { trip: NY_LONDON });
+  assert.equal(await page.isVisible('#update-banner'), false);
+  await page.evaluate(async () => (await import('./js/pwa.js')).showUpdateBanner());
+  assert.equal(await page.isVisible('#update-banner'), true);
+  await page.click('#update-later');
+  assert.equal(await page.isVisible('#update-banner'), false);
+  await page.evaluate(async () => (await import('./js/pwa.js')).showUpdateBanner());
+  await Promise.all([page.waitForEvent('load'), page.click('#update-refresh')]);
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
