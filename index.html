@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>All Trip Considered</title>
+  <meta name="description" content="Plan your sleep, caffeine, light, and hydration to recover from jet lag faster.">
+  <meta name="theme-color" content="#2f5d8a" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#101826" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="All Trip Considered">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved appearance before first paint to avoid a theme flash.
+    try {
+      var a = JSON.parse(localStorage.getItem('atc-appearance') || '{}');
+      if (a.mode === 'light' || a.mode === 'dark') document.documentElement.dataset.theme = a.mode;
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div id="decor-garland" class="decor-garland" aria-hidden="true"></div>
+  <div id="decor-particles" class="decor-particles" aria-hidden="true"></div>
+  <div id="decor-corners" class="decor-corners" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="site-title">
+        <a href="./" target="_blank" rel="noopener">
+          <img src="icons/icon.svg" alt="" width="36" height="36">
+          <span>All Trip Considered</span>
+        </a>
+      </h1>
+      <div class="header-actions">
+        <button id="install-btn" class="btn btn-ghost" type="button" hidden>Install app</button>
+        <button id="appearance-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">
+          <span aria-hidden="true">🎨</span> Appearance
+        </button>
+      </div>
+    </div>
+    <p class="tagline">Your jet lag recovery planner for sleep, caffeine, light, and hydration.</p>
+  </header>
+
+  <main class="layout">
+    <!-- ============ INPUTS ============ -->
+    <section class="panel inputs" aria-labelledby="inputs-h">
+      <h2 id="inputs-h">Your trip and sleep</h2>
+      <form id="trip-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Flight</legend>
+          <label class="field">
+            <span>Departing from</span>
+            <select id="home" name="home"></select>
+          </label>
+          <label class="field">
+            <span>Arriving in</span>
+            <select id="dest" name="dest"></select>
+          </label>
+          <div class="row-2">
+            <label class="field">
+              <span>Departure date</span>
+              <input type="date" id="depDate" name="depDate" required>
+            </label>
+            <label class="field">
+              <span>Departure time <small>(local)</small></span>
+              <input type="time" id="depTime" name="depTime" required>
+            </label>
+          </div>
+          <div class="row-2">
+            <label class="field">
+              <span>Flight length <small>(hours)</small></span>
+              <input type="number" id="durH" name="durH" min="0" max="23" step="1" inputmode="numeric">
+            </label>
+            <label class="field">
+              <span>Minutes</span>
+              <input type="number" id="durM" name="durM" min="0" max="59" step="5" inputmode="numeric">
+            </label>
+          </div>
+          <label class="field">
+            <span>Trip length <small>(days at destination)</small></span>
+            <input type="number" id="tripDays" name="tripDays" min="1" max="90" step="1" inputmode="numeric">
+          </label>
+          <p class="hint" id="arrival-hint" aria-live="polite"></p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Your normal sleep</legend>
+          <div class="row-2">
+            <label class="field">
+              <span>Usual bedtime</span>
+              <input type="time" id="bed" name="bed" required>
+            </label>
+            <label class="field">
+              <span>Usual wake time</span>
+              <input type="time" id="wake" name="wake" required>
+            </label>
+          </div>
+          <div class="field">
+            <span id="chrono-l">Chronotype</span>
+            <div class="seg" role="radiogroup" aria-labelledby="chrono-l">
+              <label><input type="radio" name="chrono" value="lark"><span>Early bird</span></label>
+              <label><input type="radio" name="chrono" value="neutral"><span>In between</span></label>
+              <label><input type="radio" name="chrono" value="owl"><span>Night owl</span></label>
+            </div>
+          </div>
+          <p class="hint" id="sleep-hint" aria-live="polite"></p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Caffeine and hydration</legend>
+          <div class="field">
+            <span id="caff-l">Caffeine sensitivity</span>
+            <div class="seg" role="radiogroup" aria-labelledby="caff-l">
+              <label><input type="radio" name="caffSens" value="low"><span>Low</span></label>
+              <label><input type="radio" name="caffSens" value="normal"><span>Normal</span></label>
+              <label><input type="radio" name="caffSens" value="high"><span>High</span></label>
+            </div>
+          </div>
+          <label class="field">
+            <span>Usual caffeinated drinks per day: <output id="cups-out" for="cups"></output></span>
+            <input type="range" id="cups" name="cups" min="0" max="6" step="1">
+          </label>
+          <div class="row-2">
+            <label class="field">
+              <span>Body weight</span>
+              <input type="number" id="weight" name="weight" min="25" max="350" step="1" inputmode="numeric">
+            </label>
+            <label class="field">
+              <span>Unit</span>
+              <select id="weightUnit" name="weightUnit">
+                <option value="kg">kg</option>
+                <option value="lb">lb</option>
+              </select>
+            </label>
+          </div>
+          <div class="row-2">
+            <label class="field">
+              <span>Daily activity</span>
+              <select id="activity" name="activity">
+                <option value="low">Light</option>
+                <option value="moderate">Moderate</option>
+                <option value="high">Very active</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Destination climate</span>
+              <select id="climate" name="climate">
+                <option value="cool">Cool</option>
+                <option value="temperate">Mild</option>
+                <option value="hot">Hot or humid</option>
+              </select>
+            </label>
+          </div>
+          <label class="field">
+            <span>Alcoholic drinks per day on this trip: <output id="alcohol-out" for="alcohol"></output></span>
+            <input type="range" id="alcohol" name="alcohol" min="0" max="5" step="1">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Plan style</legend>
+          <label class="field">
+            <span>Strategy</span>
+            <select id="strategy" name="strategy">
+              <option value="auto">Automatic (recommended)</option>
+              <option value="gradual">Gradual shift</option>
+              <option value="immediate">Switch to local time right away</option>
+              <option value="home">Stay on home time (short trips)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Days to pre-adjust before departure: <output id="pre-out" for="preDays"></output></span>
+            <input type="range" id="preDays" name="preDays" min="0" max="3" step="1">
+          </label>
+          <label class="field">
+            <span>Adjustment pace: <output id="pace-out" for="pace"></output></span>
+            <input type="range" id="pace" name="pace" min="0.5" max="1.5" step="0.25">
+          </label>
+          <div class="row-2">
+            <label class="field">
+              <span>Clock</span>
+              <select id="clock" name="clock">
+                <option value="12">12-hour</option>
+                <option value="24">24-hour</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Water units</span>
+              <select id="volUnit" name="volUnit">
+                <option value="metric">Liters</option>
+                <option value="imperial">Ounces and cups</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+        <div class="form-actions">
+          <button type="button" id="reset-btn" class="btn btn-ghost">Reset to defaults</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ OUTPUT ============ -->
+    <section class="results" aria-labelledby="plan-h" aria-live="polite">
+      <h2 id="plan-h" class="visually-hidden">Your recovery plan</h2>
+      <div id="summary" class="panel summary"></div>
+
+      <div class="tabs" role="tablist" aria-label="Plan sections">
+        <button role="tab" id="tab-plan" aria-controls="pane-plan" aria-selected="true">Daily plan</button>
+        <button role="tab" id="tab-flight" aria-controls="pane-flight" aria-selected="false" tabindex="-1">On the flight</button>
+        <button role="tab" id="tab-water" aria-controls="pane-water" aria-selected="false" tabindex="-1">Hydration</button>
+        <button role="tab" id="tab-recovery" aria-controls="pane-recovery" aria-selected="false" tabindex="-1">Recovery</button>
+      </div>
+
+      <div id="pane-plan" role="tabpanel" aria-labelledby="tab-plan" class="pane">
+        <div class="legend" aria-hidden="true">
+          <span><i class="sw sw-sleep"></i>Sleep</span>
+          <span><i class="sw sw-light"></i>Seek bright light</span>
+          <span><i class="sw sw-dark"></i>Avoid bright light</span>
+          <span><i class="sw sw-caff"></i>Caffeine OK</span>
+          <span><i class="sw sw-mel"></i>Melatonin</span>
+          <span><i class="sw sw-water"></i>Water</span>
+        </div>
+        <div id="days"></div>
+        <div class="pane-actions">
+          <button type="button" id="ics-btn" class="btn">Add sleep times to calendar (.ics)</button>
+          <button type="button" id="print-btn" class="btn btn-ghost">Print plan</button>
+        </div>
+      </div>
+      <div id="pane-flight" role="tabpanel" aria-labelledby="tab-flight" class="pane" hidden></div>
+      <div id="pane-water" role="tabpanel" aria-labelledby="tab-water" class="pane" hidden></div>
+      <div id="pane-recovery" role="tabpanel" aria-labelledby="tab-recovery" class="pane" hidden></div>
+
+      <p class="disclaimer">
+        This planner offers general wellness guidance based on published circadian research. It is not medical advice.
+        Talk with a doctor before using melatonin or changing caffeine intake if you are pregnant, take medication,
+        or have a heart, kidney, or sleep condition.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      &copy; <span id="year">2026</span>
+      <a href="https://github.com/alvin-lam/jet-lag-recovery" target="_blank" rel="noopener">All Trip Considered</a>.
+      All rights reserved.
+    </p>
+  </footer>
+
+  <!-- ============ SLEEP CHECK-IN ============ -->
+  <dialog id="checkin-dialog" class="sheet" aria-labelledby="checkin-h">
+    <form method="dialog" id="checkin-form">
+      <h2 id="checkin-h">How did you sleep?</h2>
+      <p class="hint" id="checkin-sub"></p>
+      <div class="row-2">
+        <label class="field">
+          <span>Fell asleep</span>
+          <input type="time" id="ci-bed" required>
+        </label>
+        <label class="field">
+          <span>Woke up</span>
+          <input type="time" id="ci-wake" required>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="ci-clear">Clear log</button>
+        <button type="button" class="btn btn-ghost" id="ci-cancel">Cancel</button>
+        <button type="submit" class="btn" value="save">Update my plan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ============ APPEARANCE ============ -->
+  <dialog id="appearance-dialog" class="sheet" aria-labelledby="appearance-h">
+    <form method="dialog" id="appearance-form">
+      <div class="dialog-head">
+        <h2 id="appearance-h">Appearance</h2>
+        <button type="submit" class="btn btn-ghost icon-btn" aria-label="Close">✕</button>
+      </div>
+
+      <div class="field">
+        <span id="mode-l">Color mode</span>
+        <div class="seg" role="radiogroup" aria-labelledby="mode-l">
+          <label><input type="radio" name="mode" value="system"><span>System</span></label>
+          <label><input type="radio" name="mode" value="light"><span>Light</span></label>
+          <label><input type="radio" name="mode" value="dark"><span>Dark</span></label>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <label class="field">
+          <span>Season</span>
+          <select name="season">
+            <option value="auto">Automatic</option>
+            <option value="spring">Spring</option>
+            <option value="summer">Summer</option>
+            <option value="autumn">Autumn</option>
+            <option value="winter">Winter</option>
+            <option value="none">None</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Hemisphere</span>
+          <select name="hemisphere">
+            <option value="north">Northern</option>
+            <option value="south">Southern</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Holiday</span>
+        <select name="holiday" id="holiday-select"></select>
+      </label>
+      <p class="hint" id="holiday-hint"></p>
+
+      <fieldset class="checks">
+        <legend>Decorations</legend>
+        <label><input type="checkbox" name="garland"> Garland banner</label>
+        <label><input type="checkbox" name="particles"> Falling decorations</label>
+        <label><input type="checkbox" name="corners"> Corner accents</label>
+        <label><input type="checkbox" name="motion"> Animate decorations</label>
+      </fieldset>
+
+      <label class="field">
+        <span>Decoration amount: <output id="intensity-out"></output></span>
+        <input type="range" name="intensity" min="1" max="3" step="1">
+      </label>
+    </form>
+  </dialog>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
