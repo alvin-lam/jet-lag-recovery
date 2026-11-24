@@ -115,6 +115,7 @@
   </noscript>
 
   <main class="layout">
+    <section id="today" class="panel today" aria-label="Today" aria-live="polite" hidden></section>
     <!-- ============ INPUTS ============ -->
     <section class="panel inputs" aria-labelledby="inputs-h">
       <h2 id="inputs-h">Your trip and sleep</h2>
@@ -217,6 +218,8 @@
           <p class="hint" id="sleep-hint" aria-live="polite"></p>
         </fieldset>
 
+        <details id="more-options" class="more-options">
+          <summary>More options <small>caffeine, water, plan style, clock and units</small></summary>
         <fieldset>
           <legend>Caffeine and hydration</legend>
           <div class="field">
@@ -311,6 +314,7 @@
             </label>
           </div>
         </fieldset>
+        </details>
         <div class="form-actions">
           <button type="button" id="reset-btn" class="btn btn-ghost">Reset</button>
         </div>
@@ -494,16 +498,13 @@
         </div>
       </div>
 
-      <fieldset class="icon-pick">
-        <legend>Season <span class="pick-name" id="season-name"></span></legend>
-        <div class="icon-grid" id="season-grid"></div>
-      </fieldset>
-      <fieldset class="icon-pick">
-        <legend>Holiday <span class="pick-name" id="holiday-name"></span></legend>
-        <div class="icon-grid" id="holiday-grid"></div>
-      </fieldset>
-      <p class="hint" id="holiday-hint"></p>
-      <p class="hint">Decorations change automatically with the season and holidays. Choose None for both to turn them off.</p>
+      <div class="field">
+        <span>Theme</span>
+        <p class="theme-now" id="theme-now"></p>
+        <p class="hint">Colors follow the season and switch to a holiday's colors while it is on.
+          <span id="theme-where"></span></p>
+      </div>
+      <label class="check-row"><input type="checkbox" name="decorations"> Show seasonal and holiday decorations</label>
     </form>
   </dialog>
 

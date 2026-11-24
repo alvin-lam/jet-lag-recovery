@@ -292,7 +292,7 @@ export function buildPlan(trip, nights = {}, opts = {}) {
   }
 
   return {
-    home, dest, clockDiff, shift, target, sign, absT, rate, strategy, tripDays,
+    home, dest, depUtc, arrUtc, clockDiff, shift, target, sign, absT, rate, strategy, tripDays,
     offHome, offDest, arrDate, arrHour, durH, homeBed, homeWake, sleepLen, caffCut, weightKg, cups, P0,
     pre, flight, days,
     daysToAdjust: shifting ? (adjustedDay || Math.max(1, Math.ceil((absT - Math.abs(P0)) / rate))) : 0,

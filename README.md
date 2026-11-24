@@ -8,6 +8,7 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 
 - **Location search:** type a city, airport name, IATA code (`LHR`), metro code (`NYC`, `LON`), former name (`Bombay`, `Saigon`), or country. About 3,100 airports are built in: 230 hand-picked major airports with friendly names and aliases, plus every other large or mid-sized airport with scheduled passenger flights worldwide. Accents and special letters are optional ("tromso" finds Tromsø). Places without a listed airport fall back to their time zone and show its UTC offset in place of a code, for example "Pago Pago (UTC−11)". Fully keyboard and screen reader accessible.
 - **Interactive trip input:** flight time, trip length, and your usual bedtime, wake time, and chronotype.
+- **Today:** a card at the top answers "what should I do right now?" for wherever you are in the trip: a countdown before you leave, pre-adjust steps, sleep or stay awake in the air, then what to do now and the next three steps with times during the adjustment days and on the way home. It refreshes every minute.
 - **Adaptive daily plan:** each day gets a 24-hour timeline showing sleep, when to seek or avoid bright light, the caffeine window, and water reminders.
 - **Sleep check-ins:** log how you actually slept. The rest of the plan shifts to match your real progress.
 - **Return trip planning (Preview):** add a return flight to get a plan for coming home. It starts from where your body clock is on the return day, so a fully adjusted trip reverses the whole shift, a short trip only undoes part of it, and a trip kept on home time needs little recovery. Sleep logs and calendar export work for both legs.
@@ -16,8 +17,9 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
 - **Calendar export** (`.ics`).
 - **Device defaults:** the clock (12- or 24-hour), water units, and body weight unit follow the device's region settings, for example 12-hour, ounces, and pounds in the US, and 24-hour, liters, and kilograms in most other places. Dates use the region's date order in English ("Wed, Dec 2" in the US, "Tue 1 Dec" in the UK). The Clock and Water units menus offer "Device setting" plus fixed choices, and Reset returns to the device defaults.
-- **Appearance menu** (palette icon in the header): light, dark, or system mode, plus season and holiday themes chosen from rows of emoji icons (✨ Automatic, each theme such as Winter ❄️ or Pride Month 🏳️‍🌈, and 🚫 None). Hovering shows each name, and the current choice is named above each row. Pride Month runs through June. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
-- **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. Setting both season and holiday to None turns decorations off. Animation stops when the device asks for reduced motion.
+- **Short setup:** flight, return flight, and normal sleep are up front. Caffeine, water, plan style, clock, and units sit in a collapsed "More options."
+- **Appearance menu** (palette icon in the header): light, dark, or system mode. The theme is automatic: colors follow the season and switch to a holiday's colors while it is on (for example Christmas 🎄 or Pride Month 🏳️‍🌈). The hemisphere for seasons comes from the device time zone, and US-only holidays appear only in US time zones.
+- **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. One switch in the Appearance menu turns them off. Animation stops when the device asks for reduced motion.
 - **Back to top** button in the lower right once you scroll past the header.
 - **Installable and offline:** works without a connection after the first visit. Browsers with an install prompt (Chrome, Edge, Samsung Internet) get a one-tap Install button. Where there is no prompt, a reminder explains how to add the app: Share, then Add to Home Screen on iPhone and iPad; the browser menu on Android. Desktop browsers without an install prompt, such as Safari on a Mac, show no install icon or reminder. The reminder waits until the disclaimer is accepted, can be dismissed for 14 days, and never appears once the app is installed. A download icon in the header reopens it.
 - **Private:** all data stays in the browser's local storage on your device.
@@ -69,7 +71,8 @@ js/
     timeline.js          24-hour timeline bars
     format.js            Time, duration, and volume formatting
     checkin.js           Sleep log dialog
-    appearance.js        Appearance menu and decorations
+    appearance.js        Appearance menu, automatic theme and decorations
+    today.js             Today card: what to do now and next
     legal.js             Disclaimer dialog
     to-top.js            Back to top button
     location-picker.js   Search box (combobox) for departure and arrival
@@ -94,19 +97,31 @@ The model tracks how far your body clock has shifted toward destination time. It
 
 Open work, in rough priority order. Check items off as they ship.
 
-### 1. Features for frequent flyers
+### 1. Launch checks
+
+- [ ] **Test on real phones.** Check a real iPhone (Safari) and Android phone (Chrome): installing, offline use, the Share and menu steps, and the Today card.
+- [ ] **Verify the live site and HTTPS.** In GitHub Pages settings, confirm the custom domain is verified and "Enforce HTTPS" is on.
+
+### 2. Features for frequent flyers
 
 - [ ] **Return trips and connections.** Return planning is in Preview, with sleep logs and calendar export for both legs. Still to do: multi-leg trips with layovers.
 - [ ] **Saved trips.** Keep several trips and switch between them.
-- [ ] **Reminders.** Alert travelers when to seek light, stop caffeine, and go to bed. Reliable notifications likely need a small server; the calendar export covers part of this today.
+- [ ] **Reminders.** Alert travelers when to seek light, stop caffeine, and go to bed. Reliable notifications likely need a small server; the calendar export and Today card cover part of this today.
+- [ ] **Share a plan.** Send a travel companion a link that opens the same trip.
+- [ ] **Flight lookup.** Fill in cities, times, and flight length from a flight number such as BA 178. Needs a flight data service (usually paid) and a small server to keep its key private.
 
-### 2. Content and maintenance
+### 3. Trust and polish
 
 - [ ] **Expert review.** Have a sleep specialist review the plan logic and wording.
+- [ ] **Legal review.** Have a lawyer review the disclaimer and limitation of liability.
+- [ ] **Return trips out of Preview.** Once real travelers have used return planning, remove the Preview label.
+- [ ] **Color contrast check.** Confirm each season and holiday palette meets WCAG AA in light and dark mode.
 - [ ] **Extend holiday dates before 2037.** Lunar New Year, Diwali, and Hanukkah dates are listed through 2036 in `js/data/themes.js`. Add the next ten years before then.
 
 ### Done
 
+- [x] Today card, shorter setup with More options, and an automatic season and holiday theme.
+- [x] Automated tests in the repository, run by GitHub Actions on every push.
 - [x] Airport coverage expanded to about 3,100 airports worldwide.
 - [x] Search and sharing metadata: description, canonical URL, Open Graph and X (Twitter) link previews with a 1200×630 image, structured data, robots.txt, and sitemap.xml.
 - [x] Brand name set to All Trips Considered, with links to alltripsconsidered.com.
@@ -125,6 +140,20 @@ python3 tools/build-airports.py path/to/airports.csv path/to/airports.json
 The script keeps airports with scheduled passenger service, skips codes already in the hand-picked
 list, checks every time zone against the system time zone database, and reports any zone that looks
 wrong for the airport's country or longitude. Fix those in `TZ_FIX` inside the script.
+
+## Tests
+
+Logic tests (plan math, holidays, airport search) run directly in Node. Browser tests (screens, Today card,
+return trip, install reminder, device defaults, theme, and layout at five screen widths) run in headless
+Chromium through Playwright. GitHub Actions runs everything on every push and pull request
+(`.github/workflows/test.yml`).
+
+```sh
+npm ci
+npx playwright install chromium   # once
+npm test                          # everything
+npm run test:logic                # fast logic tests only
+```
 
 ## Run locally
 

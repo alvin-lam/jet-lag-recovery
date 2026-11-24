@@ -206,8 +206,11 @@ small { color: var(--muted); font-weight: 400; }
   position: relative; z-index: 2;
 }
 @media (min-width: 960px) {
-  .layout { grid-template-columns: 380px minmax(0, 1fr); align-items: start; }
-  .inputs { position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow: auto; }
+  /* Desktop: settings on the left; Today above the plan on the right. Phones: Today comes first. */
+  .layout { grid-template-columns: 380px minmax(0, 1fr); grid-template-areas: "inputs today" "inputs results"; align-items: start; }
+  .inputs { grid-area: inputs; position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow: auto; }
+  .today { grid-area: today; }
+  .results { grid-area: results; }
 }
 .panel {
   background: var(--surface); border: 1px solid var(--border);
@@ -428,31 +431,6 @@ table.water th { color: var(--muted); font-weight: 650; font-size: .8rem; text-t
   font: inherit; font-weight: 650; color: var(--accent); background: none; border: 0; padding: 0;
   text-decoration: none; cursor: pointer;
 }
-/* Season and holiday icon pickers */
-.icon-pick { margin: 6px 0 12px; }
-.icon-pick legend {
-  text-transform: none; letter-spacing: 0; font-size: .92rem; font-weight: 600; color: var(--text); margin: 8px 0 6px;
-}
-.pick-name { font-weight: 500; color: var(--muted); margin-left: 6px; }
-.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 6px; }
-.icon-tile { position: relative; cursor: pointer; }
-.icon-tile input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
-.tile-icon {
-  display: flex; align-items: center; justify-content: center; height: 46px; font-size: 24px; line-height: 1;
-  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2);
-  transition: transform .12s, border-color .12s, background .12s;
-}
-.icon-tile:hover .tile-icon { border-color: var(--accent); transform: translateY(-1px); }
-.icon-tile input:checked + .tile-icon {
-  border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--surface));
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
-}
-.icon-tile input:focus-visible + .tile-icon { outline: 3px solid var(--focus); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) {
-  .tile-icon { transition: none; }
-  .icon-tile:hover .tile-icon { transform: none; }
-}
-
 .footer-legal { font-size: .82rem; margin-bottom: 6px !important; }
 dialog.legal { width: min(640px, calc(100vw - 32px)); }
 dialog.legal > h2 { margin-bottom: 12px; }
@@ -562,3 +540,30 @@ details.optional > .hint { margin-top: 0; margin-bottom: 10px; }
 details.optional > .btn { margin-bottom: 12px; }
 details.optional input[type="number"], details.optional select { background-color: var(--surface); }
 @media (prefers-reduced-motion: reduce) { details.optional > summary::before { transition: none; } }
+
+/* Appearance: current automatic theme */
+.theme-now { margin: 2px 0 0; font-size: 1.05rem; font-weight: 650; }
+
+/* Today card */
+.today { border-left: 4px solid var(--accent); }
+.today-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.today-head h2 { font-size: 1.3rem; }
+.today-sub { margin: 2px 0 8px; color: var(--muted); font-size: .9rem; }
+.today-lead { margin: 6px 0 10px; }
+.today-label { font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 12px 0 6px; }
+.today .tips { gap: 8px; }
+
+/* More options (secondary settings, collapsed by default) */
+details.more-options { margin: 6px 0 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+details.more-options > summary {
+  cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  padding: 12px 0; font-weight: 700; color: var(--accent); min-height: 44px;
+}
+details.more-options > summary::-webkit-details-marker { display: none; }
+details.more-options > summary::before {
+  content: ''; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg); transition: transform .15s; align-self: center; margin-right: 4px;
+}
+details.more-options[open] > summary::before { transform: rotate(45deg); }
+details.more-options > summary small { font-weight: 500; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { details.more-options > summary::before { transition: none; } }

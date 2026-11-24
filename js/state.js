@@ -38,13 +38,22 @@ function upgradeTrip(saved) {
   return saved;
 }
 
+// The theme used to have season and holiday pickers. Choosing None for both turned decorations off,
+// so keep them off for those people; every other old choice now follows the automatic theme.
+function upgradeAppearance(saved) {
+  if (saved && typeof saved === 'object' && !('decorations' in saved) && saved.season === 'none' && saved.holiday === 'none') {
+    saved.decorations = false;
+  }
+  return saved;
+}
+
 export const store = {
   trip: pick(TRIP_DEFAULTS, upgradeTrip(load(STORAGE_KEYS.trip, null))),
   // Sleep logs: { sig: trip signature, nights: { [dayNumber]: { bed: 'HH:MM', wake: 'HH:MM' } } }
   checkins: load(STORAGE_KEYS.checkins, { sig: '', nights: {} }),
   // Same shape, for the return leg. Kept separate so the two legs' day numbers never collide.
   retCheckins: load(STORAGE_KEYS.retCheckins, { sig: '', nights: {} }),
-  appearance: pick(APPEARANCE_DEFAULTS, load(STORAGE_KEYS.appearance, null)),
+  appearance: pick(APPEARANCE_DEFAULTS, upgradeAppearance(load(STORAGE_KEYS.appearance, null))),
 };
 
 // Writes are batched so dragging a slider does not hit storage on every tick.

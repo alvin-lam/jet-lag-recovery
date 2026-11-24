@@ -27,8 +27,8 @@ export const TRIP_DEFAULTS = Object.freeze({
   v: 4, // settings version, used for one-time upgrades of saved settings (see state.js)
 });
 
-// Decorations follow the active season or holiday automatically, so only these choices are stored.
-export const APPEARANCE_DEFAULTS = Object.freeze({ mode: 'system', season: 'auto', holiday: 'auto' });
+// The theme itself is automatic (season, or holiday while one is on); only these choices are stored.
+export const APPEARANCE_DEFAULTS = Object.freeze({ mode: 'system', decorations: true });
 
 // Circadian and wellness constants used by the plan model.
 export const MODEL = Object.freeze({

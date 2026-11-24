@@ -18,6 +18,7 @@ import { setupLegal } from './ui/legal.js';
 import { setupToTop } from './ui/to-top.js';
 import { setupInstall } from './ui/install.js';
 import { setupPwa } from './pwa.js';
+import { renderToday } from './ui/today.js';
 
 const deviceTz = deviceTimeZone();
 let plan = null;
@@ -62,6 +63,7 @@ function render() {
   renderWater(plan);
   renderRecovery(plan);
   renderReturn();
+  renderToday(plan, back);
 }
 
 /** Return trip (Preview): its own tab, built from where the outbound plan leaves the body clock. */
@@ -108,6 +110,9 @@ function init() {
   setupLegal();
   setupToTop();
   setupPwa();
+  // Keep the Today card current: every minute, and whenever the app comes back to the screen.
+  setInterval(() => renderToday(plan, back), 60000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') renderToday(plan, back); });
   setupInstall();
   render();
 }

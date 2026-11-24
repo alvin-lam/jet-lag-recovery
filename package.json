@@ -1,0 +1,14 @@
+{
+  "name": "jet-lag-recovery",
+  "private": true,
+  "description": "Jet Lag & Recovery by All Trips Considered. Tests only; the app itself needs no build step.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 'tests/*.test.js'",
+    "test:logic": "node --test tests/model.test.js tests/calendar.test.js tests/locations.test.js",
+    "test:ui": "node --test tests/ui.test.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
