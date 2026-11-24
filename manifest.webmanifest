@@ -1,18 +1,40 @@
 {
-  "name": "All Trip Considered",
-  "short_name": "Trip Considered",
-  "description": "Plan sleep, caffeine, light, and hydration to recover from jet lag faster.",
+  "name": "Jet Lag and Recovery",
+  "short_name": "Jet Lag",
+  "description": "Jet Lag and Recovery by All Trip Considered: plan sleep, caffeine, light, and hydration to recover from jet lag faster.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f4f6fa",
   "theme_color": "#2f5d8a",
-  "categories": ["travel", "health", "lifestyle"],
+  "categories": [
+    "travel",
+    "health",
+    "lifestyle"
+  ],
   "icons": [
-    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
-  ]
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "id": "./"
 }

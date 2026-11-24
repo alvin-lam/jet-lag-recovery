@@ -28,14 +28,14 @@ export function exportIcs(p) {
     'SUMMARY:' + escText(summary), 'DESCRIPTION:' + escText(desc + ' ' + NOTE), 'END:VEVENT');
 
   for (const d of p.pre) {
-    add(sleepStart(d.date, d.bed, p.home.tz), p.sleepLen, 'Sleep (jet lag prep)', 'All Trip Considered: pre-flight shift.');
+    add(sleepStart(d.date, d.bed, p.home.tz), p.sleepLen, 'Sleep (jet lag prep)', 'Jet Lag and Recovery: pre-flight shift.');
   }
   for (const d of p.days) {
     add(sleepStart(d.date, d.bed, p.dest.tz), d.night || p.sleepLen, 'Sleep in ' + p.dest.name,
-      `All Trip Considered: last caffeine ${fmtTime(d.caff.cutoff)}.`);
+      `Jet Lag and Recovery: last caffeine ${fmtTime(d.caff.cutoff)}.`);
   }
 
-  const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//All Trip Considered//Jet Lag Planner//EN',
+  const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//All Trip Considered//Jet Lag and Recovery//EN',
     'CALSCALE:GREGORIAN', ...events, 'END:VCALENDAR'].join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([body], { type: 'text/calendar' }));
