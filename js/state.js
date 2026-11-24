@@ -38,6 +38,11 @@ export const store = {
 
 // Writes are batched so dragging a slider does not hit storage on every tick.
 const saveTripSoon = debounce(() => save(STORAGE_KEYS.trip, store.trip), 250);
+// Save right away when the page is hidden, closed or reloaded, so a batched change is never lost.
+addEventListener('pagehide', () => save(STORAGE_KEYS.trip, store.trip));
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') save(STORAGE_KEYS.trip, store.trip);
+});
 
 export function setTrip(patch) {
   Object.assign(store.trip, patch);

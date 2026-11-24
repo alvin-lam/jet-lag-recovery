@@ -1,33 +1,67 @@
-// Location lookup and search over major airports, plus any IANA time zone as a fallback.
+// Location lookup and search over airports worldwide, plus any IANA time zone as a fallback.
 //
 // A trip stores a location as a short key:
-//   "code:LHR"            an airport from AIRPORTS
+//   "code:LHR"            an airport (curated list first, then the generated world list)
 //   "tz:Europe/London"    a bare time zone (for places without a listed airport)
 // Keys saved by earlier versions ("London|Europe/London") are still understood.
 import { AIRPORTS } from './airports.js';
+import { WORLD_AIRPORTS } from './airports-world.js';
 import { allTimeZones, tzOffset, fmtOffset } from '../lib/time.js';
 
 /** Lowercase and strip accents so "sao" matches "São" and "zurich" matches "Zürich". */
-const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+// Letters that do not decompose into a base letter plus an accent are mapped by hand ("tromso" finds Tromsø).
+const FOLD = { ø: 'o', æ: 'ae', œ: 'oe', ß: 'ss', ł: 'l', đ: 'd', ð: 'd', þ: 'th', ı: 'i', ħ: 'h' };
+const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[øæœßłđðþıħ]/g, (c) => FOLD[c]);
 const words = (s) => s.split(/[^a-z0-9]+/).filter(Boolean);
 const tzCity = (tz) => tz.split('/').pop().replace(/_/g, ' ');
 
 function makeAirport([code, city, country, tz, airport, aliases = '']) {
-  return {
-    key: 'code:' + code, code, name: city, city, country, tz, airport,
-    label: `${city} (${code})`,
-    // Precomputed search fields, built once at load time.
-    s: {
-      code: code.toLowerCase(),
-      aliasCodes: new Set(aliases.split(' ').filter((a) => /^[A-Z]{3}$/.test(a)).map((a) => a.toLowerCase())),
-      city: norm(city), cityWords: words(norm(city)),
-      other: norm(`${airport} ${aliases} ${country}`), otherWords: words(norm(`${airport} ${aliases}`)),
-      country: norm(country),
-    },
-  };
+  return { key: 'code:' + code, code, name: city, city, country, tz, airport, aliases, label: `${city} (${code})` };
 }
 
-export const LOCATIONS = AIRPORTS.map(makeAirport);
+// The world list stores ISO country codes to stay small; the browser supplies English names.
+let regionNames = null;
+function countryName(cc) {
+  try {
+    regionNames ||= new Intl.DisplayNames(['en'], { type: 'region' });
+    return regionNames.of(cc) || cc;
+  } catch {
+    return cc;
+  }
+}
+
+function parseWorld(text) {
+  const out = [];
+  for (const line of text.split('\n')) {
+    if (!line) continue;
+    const [code, city, cc, tz, airport] = line.split('|');
+    out.push(makeAirport([code, city, countryName(cc), tz, airport]));
+  }
+  return out;
+}
+
+// Curated airports come first, then large airports, then medium ones, so search ties rank the
+// best-known airport first.
+export const LOCATIONS = AIRPORTS.map(makeAirport).concat(parseWorld(WORLD_AIRPORTS));
+
+// Search fields are built on the first search, not at load time, so startup stays fast.
+let indexed = false;
+function ensureIndex() {
+  if (indexed) return;
+  for (const l of LOCATIONS) {
+    const aliases = l.aliases || '';
+    l.s = {
+      code: l.code.toLowerCase(),
+      aliasCodes: new Set(aliases.split(' ').filter((a) => /^[A-Z]{3}$/.test(a)).map((a) => a.toLowerCase())),
+      aliasWords: new Set(words(norm(aliases))),
+      city: norm(l.city), cityWords: words(norm(l.city)),
+      other: norm(`${l.airport} ${aliases} ${l.country}`), otherWords: words(norm(`${l.airport} ${aliases}`)),
+      country: norm(l.country),
+      airport: norm(l.airport),
+    };
+  }
+  indexed = true;
+}
 const BY_KEY = new Map(LOCATIONS.map((l) => [l.key, l]));
 const BY_TZ = new Map();
 for (const l of LOCATIONS) {
@@ -101,7 +135,9 @@ function score(l, q) {
   if (q.length === 3 && s.code === q) return 100;
   if (q.length === 3 && s.aliasCodes.has(q)) return 90;
   if (s.city === q) return 85;
+  if (q.length >= 4 && s.aliasWords.has(q)) return 84; // curated alias such as "bali" or "bombay"
   if (s.city.startsWith(q)) return 80;
+  if (s.airport.startsWith(q)) return 72; // airport named after the city, e.g. "London Luton"
   if (s.cityWords.some((w) => w.startsWith(q))) return 70;
   if (s.otherWords.includes(q)) return 65; // whole-word alias or airport name, e.g. "bali", "heathrow"
   if (s.otherWords.some((w) => w.startsWith(q))) return 60;
@@ -114,6 +150,7 @@ function score(l, q) {
 export function searchLocations(query, limit = 8) {
   const q = norm(query.trim());
   if (!q) return [];
+  ensureIndex();
   const hits = [];
   LOCATIONS.forEach((l, i) => {
     const sc = score(l, q);

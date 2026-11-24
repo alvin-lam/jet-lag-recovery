@@ -6,7 +6,7 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 
 ## Features
 
-- **Location search:** type a city, airport name, IATA code (`LHR`), metro code (`NYC`, `LON`), former name (`Bombay`, `Saigon`), or country. About 230 major airports are built in. Places without a listed airport fall back to their time zone and show its UTC offset in place of a code, for example "Pago Pago (UTC−11)". Fully keyboard and screen reader accessible.
+- **Location search:** type a city, airport name, IATA code (`LHR`), metro code (`NYC`, `LON`), former name (`Bombay`, `Saigon`), or country. About 3,100 airports are built in: 230 hand-picked major airports with friendly names and aliases, plus every other large or mid-sized airport with scheduled passenger flights worldwide. Accents and special letters are optional ("tromso" finds Tromsø). Places without a listed airport fall back to their time zone and show its UTC offset in place of a code, for example "Pago Pago (UTC−11)". Fully keyboard and screen reader accessible.
 - **Interactive trip input:** flight time, trip length, and your usual bedtime, wake time, and chronotype.
 - **Adaptive daily plan:** each day gets a 24-hour timeline showing sleep, when to seek or avoid bright light, the caffeine window, and water reminders.
 - **Sleep check-ins:** log how you actually slept. The rest of the plan shifts to match your real progress.
@@ -48,7 +48,8 @@ js/
   state.js               The single store for trip, sleep logs, and appearance
   pwa.js                 Service worker registration and install button
   data/
-    airports.js          Major airports: code, city, country, time zone, aliases
+    airports.js          Hand-picked major airports: code, city, country, time zone, aliases
+    airports-world.js    Generated list of other airports with scheduled flights (see tools/)
     locations.js         Location keys, lookups, and ranked search index
     themes.js            Holiday and season names, emoji, and lunisolar dates
   lib/
@@ -115,7 +116,6 @@ Do these before promoting the site, since they decide whether the live app works
 - [ ] **Return trips and connections.** Plan the return leg and multi-leg trips with layovers in one itinerary.
 - [ ] **Saved trips.** Keep several trips and switch between them.
 - [ ] **Reminders.** Alert travelers when to seek light, stop caffeine, and go to bed. Reliable notifications likely need a small server; the calendar export covers part of this today.
-- [ ] **Wider airport coverage.** Grow beyond the ~230 built-in airports, or add a larger city list, so smaller cities match by name rather than falling back to time zones.
 
 ### 4. Content and maintenance
 
@@ -124,9 +124,24 @@ Do these before promoting the site, since they decide whether the live app works
 
 ### Done
 
+- [x] Airport coverage expanded to about 3,100 airports worldwide.
 - [x] Search and sharing metadata: description, canonical URL, Open Graph and X (Twitter) link previews with a 1200×630 image, structured data, robots.txt, and sitemap.xml.
 - [x] Brand name set to All Trips Considered, with links to alltripsconsidered.com.
 - [x] Lunar New Year, Diwali, and Hanukkah dates extended through 2036.
+
+## Updating the airport list
+
+`js/data/airports-world.js` is generated. To rebuild it, download `airports.csv` from
+[OurAirports](https://github.com/davidmegginson/ourairports-data) and `airports.json` from
+[mwgg/Airports](https://github.com/mwgg/Airports), then run:
+
+```sh
+python3 tools/build-airports.py path/to/airports.csv path/to/airports.json
+```
+
+The script keeps airports with scheduled passenger service, skips codes already in the hand-picked
+list, checks every time zone against the system time zone database, and reports any zone that looks
+wrong for the airport's country or longitude. Fix those in `TZ_FIX` inside the script.
 
 ## Run locally
 
@@ -144,6 +159,13 @@ When you change any cached file, bump `CACHE` in `sw.js` so installed copies upd
 Any static host works, including GitHub Pages. Publish the repository root.
 
 The site is served at `https://jetlag.alltripsconsidered.com/` (see `CNAME`). The canonical URL, Open Graph and X image URLs, structured data, `robots.txt`, and `sitemap.xml` all use that address, so update them together if the domain changes. Update `<lastmod>` in `sitemap.xml` when the page changes meaningfully.
+
+## Data sources
+
+- Airport codes, names, and locations: [OurAirports](https://ourairports.com/data/), public domain.
+- Airport time zones: [mwgg/Airports](https://github.com/mwgg/Airports), MIT License, Copyright (c) 2014 mwgg.
+  Zones that were wrong for the airport's country were corrected (see `TZ_FIX` in `tools/build-airports.py`).
+- Title font: Instrument Serif, SIL Open Font License (see `assets/fonts/OFL.txt`).
 
 ## Disclaimer
 
