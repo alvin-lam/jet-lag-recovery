@@ -242,7 +242,8 @@ legend {
 .combo-list [role="option"][aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 .combo-list [aria-selected="true"] .opt-sub { color: inherit; opacity: .85; }
 .opt-main { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.opt-code { font-weight: 800; letter-spacing: .06em; font-size: .85rem; }
+.opt-code { font-weight: 800; letter-spacing: .06em; font-size: .85rem; white-space: nowrap; }
+.opt-tz { font-weight: 700; letter-spacing: 0; }
 .opt-sub { font-size: .8rem; color: var(--muted); }
 .opt-empty { padding: 10px; font-size: .88rem; color: var(--muted); }
 /* Side-by-side fields: controls sit on one baseline even if one label wraps. */
@@ -295,6 +296,31 @@ output { font-weight: 700; color: var(--accent); }
   transition: opacity .2s, transform .2s;
 }
 .to-top[hidden] { display: none; }
+
+/* Add to Home Screen reminder */
+.install-banner {
+  position: fixed; z-index: 6; left: 50%; transform: translateX(-50%);
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(560px, calc(100vw - 24px));
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  padding: 12px 14px; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(10, 15, 25, .22);
+}
+.install-banner[hidden] { display: none; }
+.install-banner img { border-radius: 9px; }
+.ib-text { margin: 0; font-size: .9rem; line-height: 1.4; }
+.ib-text > strong { display: block; }
+.ib-actions { display: flex; gap: 6px; }
+.inline-ic { vertical-align: -3px; margin: 0 1px; }
+.install-steps { margin: 6px 0 10px; padding-left: 22px; display: grid; gap: 8px; }
+/* Keep the back-to-top button clear of the banner. */
+body.has-install-banner .to-top { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 96px); }
+@media (max-width: 520px) {
+  .install-banner { grid-template-columns: 40px minmax(0, 1fr); }
+  .ib-actions { grid-column: 1 / -1; justify-content: flex-end; }
+  body.has-install-banner .to-top { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 150px); }
+}
 .form-actions { display: flex; justify-content: flex-end; }
 
 /* ========== Summary ========== */
@@ -497,7 +523,7 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
 
 /* ========== Print ========== */
 @media print {
-  .inputs, .tabs, .pane-actions, .link-btn, .site-header .header-actions, .decor-garland,
+  .inputs, .tabs, .pane-actions, .link-btn, .install-banner, .site-header .header-actions, .decor-garland,
   .decor-particles, .decor-corners, .checkin-row, .legend, .to-top { display: none !important; }
   .layout { grid-template-columns: 1fr; }
   .pane[hidden] { display: flex !important; }

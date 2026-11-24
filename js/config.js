@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   checkins: 'atc-checkins',
   appearance: 'atc-appearance',
   disclaimer: 'atc-disclaimer',
+  installNag: 'atc-install-dismissed', // when the Add to Home Screen reminder was last dismissed
 };
 
 // Bump this when the disclaimer text changes so returning users acknowledge the new version.

@@ -56,6 +56,12 @@ export function addDays(dateStr, n) {
   return t.getUTCFullYear() + '-' + pad(t.getUTCMonth() + 1) + '-' + pad(t.getUTCDate());
 }
 
+/** Minutes east of UTC → "UTC+5:30", "UTC−11". */
+export function fmtOffset(mins) {
+  const a = Math.abs(mins);
+  return 'UTC' + (mins < 0 ? '−' : '+') + Math.floor(a / 60) + (a % 60 ? ':' + pad(a % 60) : '');
+}
+
 export function deviceTimeZone() {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch { return 'UTC'; }
 }

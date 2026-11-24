@@ -44,7 +44,4 @@ export function fmtDate(dateStr) {
     { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
 }
 
-export function fmtOffset(mins) {
-  const a = Math.abs(mins);
-  return 'UTC' + (mins < 0 ? '−' : '+') + Math.floor(a / 60) + (a % 60 ? ':' + pad(a % 60) : '');
-}
+export { fmtOffset } from '../lib/time.js';

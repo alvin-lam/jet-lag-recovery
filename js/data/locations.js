@@ -5,7 +5,7 @@
 //   "tz:Europe/London"    a bare time zone (for places without a listed airport)
 // Keys saved by earlier versions ("London|Europe/London") are still understood.
 import { AIRPORTS } from './airports.js';
-import { allTimeZones } from '../lib/time.js';
+import { allTimeZones, tzOffset, fmtOffset } from '../lib/time.js';
 
 /** Lowercase and strip accents so "sao" matches "São" and "zurich" matches "Zürich". */
 const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -35,9 +35,24 @@ for (const l of LOCATIONS) {
   BY_TZ.get(l.tz).push(l);
 }
 
-function zoneLocation(tz) {
-  return { key: 'tz:' + tz, code: '', name: tzCity(tz), city: tzCity(tz), country: tz.split('/')[0].replace(/_/g, ' '), tz,
-    airport: 'Time zone', label: tzCity(tz) + ' (time zone)' };
+/**
+ * A place with no listed airport, identified by its time zone. Its label shows the zone's current
+ * UTC offset in place of an airport code, for example "Pago Pago (UTC−11)". The offset is read
+ * when the label is shown, so it stays right across daylight saving changes.
+ */
+function zoneLocation(tz, name) {
+  const fixed = /^(UTC|GMT|Etc\/)/.test(tz); // zones with no city, such as UTC or Etc/GMT+5
+  const offset = () => fmtOffset(tzOffset(tz, Date.now()));
+  const isUtc = /^(UTC|GMT|Etc\/(UTC|GMT|Universal|Zulu))$/.test(tz);
+  const city = name || (isUtc ? 'UTC' : fixed ? offset() : tzCity(tz));
+  return {
+    key: 'tz:' + tz, code: '', name: city, city, tz,
+    country: tz.includes('/') ? tz.split('/')[0].replace(/_/g, ' ') : 'Coordinated Universal Time',
+    airport: 'No nearby airport listed',
+    zoneName: tz.replace(/_/g, ' '),
+    get offset() { return offset(); },
+    get label() { return fixed && !name ? city : `${city} (${offset()})`; },
+  };
 }
 
 /** Turn a stored key into a location object. Results are cached because this runs on every render. */
@@ -51,7 +66,7 @@ export function parseLoc(key) {
     // Legacy "Name|Zone" key: prefer the matching airport so the label stays familiar.
     const i = key.lastIndexOf('|');
     const name = key.slice(0, i), tz = key.slice(i + 1);
-    loc = (BY_TZ.get(tz) || []).find((l) => l.city === name) || { ...zoneLocation(tz), name, city: name, label: name };
+    loc = (BY_TZ.get(tz) || []).find((l) => l.city === name) || zoneLocation(tz, name);
   } else {
     loc = zoneLocation('UTC');
   }
@@ -70,9 +85,14 @@ export function locationForTz(tz) {
 }
 
 // Time zone entries are only built the first time a search needs them.
+// UTC is added by hand because some browsers leave it out of their time zone list.
 let zoneIndex = null;
 function zones() {
-  if (!zoneIndex) zoneIndex = allTimeZones().map((tz) => ({ loc: zoneLocation(tz), s: norm(tz.replace(/_/g, ' ')) }));
+  if (!zoneIndex) {
+    const list = allTimeZones();
+    if (!list.includes('UTC')) list.push('UTC');
+    zoneIndex = list.map((tz) => ({ loc: zoneLocation(tz), s: norm(tz.replace(/_/g, ' ')), city: norm(tzCity(tz)) }));
+  }
   return zoneIndex;
 }
 
@@ -102,11 +122,13 @@ export function searchLocations(query, limit = 8) {
   hits.sort((a, b) => b.sc - a.sc || a.i - b.i);
   const out = hits.slice(0, limit).map((h) => h.l);
   if (out.length < limit && q.length >= 3) {
+    // Zones whose city starts with the query rank above zones that merely contain it,
+    // so "pago" lists Pago Pago before Galapagos.
     const seen = new Set(out.map((l) => l.tz));
-    for (const z of zones()) {
-      if (out.length >= limit) break;
-      if (z.s.includes(q) && !seen.has(z.loc.tz)) out.push(z.loc);
-    }
+    const matches = zones().filter((z) => z.s.includes(q) && !seen.has(z.loc.tz))
+      .map((z) => ({ z, rank: z.city.startsWith(q) ? 0 : 1 }))
+      .sort((a, b) => a.rank - b.rank);
+    for (const { z } of matches.slice(0, limit - out.length)) out.push(z.loc);
   }
   return out;
 }

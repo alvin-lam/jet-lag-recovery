@@ -6,7 +6,7 @@ By All Trip Considered. A progressive web app (PWA) that helps frequent flyers r
 
 ## Features
 
-- **Location search:** type a city, airport name, IATA code (`LHR`), metro code (`NYC`, `LON`), former name (`Bombay`, `Saigon`), or country. About 230 major airports are built in, and any time zone works as a fallback. Fully keyboard and screen reader accessible.
+- **Location search:** type a city, airport name, IATA code (`LHR`), metro code (`NYC`, `LON`), former name (`Bombay`, `Saigon`), or country. About 230 major airports are built in. Places without a listed airport fall back to their time zone and show its UTC offset in place of a code, for example "Pago Pago (UTC−11)". Fully keyboard and screen reader accessible.
 - **Interactive trip input:** flight time, trip length, and your usual bedtime, wake time, and chronotype.
 - **Adaptive daily plan:** each day gets a 24-hour timeline showing sleep, when to seek or avoid bright light, the caffeine window, and water reminders.
 - **Sleep check-ins:** log how you actually slept. The rest of the plan shifts to match your real progress.
@@ -17,7 +17,7 @@ By All Trip Considered. A progressive web app (PWA) that helps frequent flyers r
 - **Appearance menu** (palette icon in the header): light, dark, or system mode, plus season and holiday themes chosen from rows of emoji icons (✨ Automatic, each theme such as Winter ❄️ or Pride Month 🏳️‍🌈, and 🚫 None). Hovering shows each name, and the current choice is named above each row. Pride Month runs through June. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
 - **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. Setting both season and holiday to None turns decorations off. Animation stops when the device asks for reduced motion.
 - **Back to top** button in the lower right once you scroll past the header.
-- **Installable and offline:** works without a connection after the first visit.
+- **Installable and offline:** works without a connection after the first visit. Browsers with an install prompt (Chrome, Edge, Samsung Internet) get a one-tap Install button. Where there is no prompt, a reminder explains how to add the app: Share, then Add to Home Screen on iPhone and iPad; the browser menu on Android; File, then Add to Dock in Safari on a Mac. The reminder waits until the disclaimer is accepted, can be dismissed for 14 days, and never appears once the app is installed. A download icon in the header reopens it.
 - **Private:** all data stays in the browser's local storage on your device.
 
 ## Health and liability notices in the app
@@ -66,6 +66,7 @@ js/
     legal.js             Disclaimer dialog
     to-top.js            Back to top button
     location-picker.js   Search box (combobox) for departure and arrival
+    install.js           Install button, Add to Home Screen reminder and steps
     tabs.js, dialog.js, ics.js
 ```
 

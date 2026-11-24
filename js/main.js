@@ -14,6 +14,7 @@ import { exportIcs } from './ui/ics.js';
 import { setupAppearance } from './ui/appearance.js';
 import { setupLegal } from './ui/legal.js';
 import { setupToTop } from './ui/to-top.js';
+import { setupInstall } from './ui/install.js';
 import { setupPwa } from './pwa.js';
 
 const deviceTz = deviceTimeZone();
@@ -77,6 +78,7 @@ function init() {
   setupLegal();
   setupToTop();
   setupPwa();
+  setupInstall();
   render();
 }
 

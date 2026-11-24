@@ -37,7 +37,12 @@
         </a>
       </h1>
       <div class="header-actions">
-        <button id="install-btn" class="btn btn-ghost" type="button" hidden>Install app</button>
+        <button id="install-btn" class="btn btn-ghost round-btn" type="button" hidden
+          aria-label="Install app" title="Install app">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+            <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11M7 10l5 5 5-5M5 20h14"/>
+          </svg>
+        </button>
         <button id="appearance-btn" class="btn btn-ghost round-btn" type="button" aria-haspopup="dialog"
           aria-label="Appearance" title="Appearance">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
@@ -281,6 +286,25 @@
       <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/>
     </svg>
   </button>
+
+  <!-- ============ INSTALL REMINDER ============ -->
+  <div id="install-banner" class="install-banner" role="region" aria-label="Install the app" hidden>
+    <img src="assets/icons/icon-192.png" alt="" width="40" height="40">
+    <p class="ib-text"><strong>Get Jet Lag &amp; Recovery</strong> <span id="install-banner-msg"></span></p>
+    <div class="ib-actions">
+      <button type="button" id="install-banner-action" class="btn btn-sm"></button>
+      <button type="button" id="install-banner-close" class="btn btn-ghost btn-sm" aria-label="Not now">Not now</button>
+    </div>
+  </div>
+
+  <dialog id="install-dialog" class="sheet" aria-labelledby="install-h">
+    <h2 id="install-h">Add to Home Screen</h2>
+    <ol id="install-steps" class="install-steps"></ol>
+    <p class="hint">Once added, the app opens full screen and keeps working without a connection.</p>
+    <div class="dialog-actions">
+      <button type="button" id="install-done" class="btn">Got it</button>
+    </div>
+  </dialog>
 
   <!-- ============ DISCLAIMER ============ -->
   <dialog id="legal-dialog" class="sheet legal" aria-labelledby="legal-h">

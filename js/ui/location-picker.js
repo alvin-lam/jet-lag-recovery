@@ -24,11 +24,22 @@ export function createLocationPicker(input, { getKey, onSelect }) {
 
   function render() {
     const now = Date.now();
-    list.innerHTML = results.map((l, i) => `
+    // Airports show their code on the right. Places without one show their UTC offset there instead,
+    // and name the time zone underneath.
+    list.innerHTML = results.map((l, i) => {
+      const offset = fmtOffset(tzOffset(l.tz, now));
+      const badge = l.code
+        ? `<span class="opt-code">${l.code}</span>`
+        : `<span class="opt-code opt-tz">${offset}</span>`;
+      const sub = l.code
+        ? `${esc(l.airport)} · ${esc(l.country)} · ${offset}`
+        : `${esc(l.airport)} · Time zone ${esc(l.zoneName)}`;
+      return `
       <li id="${optionId(i)}" role="option" aria-selected="${i === active}" data-i="${i}">
-        <span class="opt-main"><strong>${esc(l.city)}</strong>${l.code ? `<span class="opt-code">${l.code}</span>` : ''}</span>
-        <span class="opt-sub">${esc(l.airport)} · ${esc(l.country)} · ${fmtOffset(tzOffset(l.tz, now))}</span>
-      </li>`).join('') || '<li class="opt-empty" role="presentation">No matches. Try a city, airport, or 3-letter code.</li>';
+        <span class="opt-main"><strong>${esc(l.city)}</strong>${badge}</span>
+        <span class="opt-sub">${sub}</span>
+      </li>`;
+    }).join('') || '<li class="opt-empty" role="presentation">No matches. Try a city, airport, or 3-letter code.</li>';
     if (active >= 0) {
       input.setAttribute('aria-activedescendant', optionId(active));
       document.getElementById(optionId(active))?.scrollIntoView({ block: 'nearest' });
