@@ -328,6 +328,20 @@ table.water th { color: var(--muted); font-weight: 650; font-size: .8rem; text-t
 .table-wrap { overflow-x: auto; }
 
 .disclaimer { font-size: .82rem; color: var(--muted); margin: 6px 0 0; }
+.notice {
+  padding: 10px 14px; border-radius: var(--radius-sm); font-size: .9rem;
+  background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--warn);
+}
+.link-btn {
+  font: inherit; font-weight: 650; color: var(--accent); background: none; border: 0; padding: 0;
+  text-decoration: underline; cursor: pointer;
+}
+.footer-legal { font-size: .82rem; margin-bottom: 6px !important; }
+dialog.legal { width: min(640px, calc(100vw - 32px)); }
+dialog.legal > h2 { margin-bottom: 12px; }
+.legal-body { max-height: min(60vh, 520px); overflow: auto; padding-right: 4px; font-size: .92rem; }
+.legal-body h3 { font-size: .95rem; margin: 14px 0 4px; }
+.legal-body p { margin: 0 0 8px; }
 
 /* ========== Dialogs ========== */
 dialog.sheet {
@@ -386,7 +400,7 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
 
 /* ========== Print ========== */
 @media print {
-  .inputs, .tabs, .pane-actions, .site-header .header-actions, .decor-garland,
+  .inputs, .tabs, .pane-actions, .link-btn, .site-header .header-actions, .decor-garland,
   .decor-particles, .decor-corners, .checkin-row, .legend { display: none !important; }
   .layout { grid-template-columns: 1fr; }
   .pane[hidden] { display: flex !important; }

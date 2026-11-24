@@ -1,15 +1,38 @@
 /* All Trip Considered service worker: offline-first app shell. */
-const CACHE = 'atc-v1';
+// Bump the version whenever any cached file changes so clients pick up the update.
+const CACHE = 'atc-v2';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css',
-  './app.js',
+  './css/styles.css',
   './manifest.webmanifest',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
+  './js/config.js',
+  './js/core/calendar.js',
+  './js/core/model.js',
+  './js/data/cities.js',
+  './js/data/themes.js',
+  './js/lib/intervals.js',
+  './js/lib/storage.js',
+  './js/lib/time.js',
+  './js/lib/util.js',
+  './js/main.js',
+  './js/pwa.js',
+  './js/state.js',
+  './js/ui/appearance.js',
+  './js/ui/checkin.js',
+  './js/ui/dialog.js',
+  './js/ui/form.js',
+  './js/ui/format.js',
+  './js/ui/ics.js',
+  './js/ui/legal.js',
+  './js/ui/panes.js',
+  './js/ui/plan-view.js',
+  './js/ui/tabs.js',
+  './js/ui/timeline.js',
+  './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png',
+  './assets/icons/icon-maskable-512.png',
+  './assets/icons/icon.svg',
 ];
 
 self.addEventListener('install', (event) => {

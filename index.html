@@ -8,11 +8,11 @@
   <meta name="theme-color" content="#2f5d8a" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#101826" media="(prefers-color-scheme: dark)">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="All Trip Considered">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/styles.css">
   <script>
     // Apply saved appearance before first paint to avoid a theme flash.
     try {
@@ -30,7 +30,7 @@
     <div class="header-inner">
       <h1 class="site-title">
         <a href="./" target="_blank" rel="noopener">
-          <img src="icons/icon.svg" alt="" width="36" height="36">
+          <img src="assets/icons/icon.svg" alt="" width="36" height="36">
           <span>All Trip Considered</span>
         </a>
       </h1>
@@ -205,6 +205,11 @@
     <!-- ============ OUTPUT ============ -->
     <section class="results" aria-labelledby="plan-h" aria-live="polite">
       <h2 id="plan-h" class="visually-hidden">Your recovery plan</h2>
+      <aside class="notice" role="note" aria-label="Health notice">
+        <strong>Not health advice.</strong> This plan is general information for educational purposes only. It is not
+        medical advice and does not replace a doctor. Use it at your own risk.
+        <button type="button" class="link-btn" data-open-legal>Read the full disclaimer</button>
+      </aside>
       <div id="summary" class="panel summary"></div>
 
       <div class="tabs" role="tablist" aria-label="Plan sections">
@@ -234,20 +239,71 @@
       <div id="pane-recovery" role="tabpanel" aria-labelledby="tab-recovery" class="pane" hidden></div>
 
       <p class="disclaimer">
-        This planner offers general wellness guidance based on published circadian research. It is not medical advice.
-        Talk with a doctor before using melatonin or changing caffeine intake if you are pregnant, take medication,
-        or have a heart, kidney, or sleep condition.
+        All Trip Considered provides general information based on published sleep and circadian research. It is not
+        medical, health, or nutritional advice, and it does not create a doctor and patient relationship. Talk with a
+        qualified health professional before changing your sleep, caffeine, fluid intake, or supplement use, especially
+        if you are pregnant, take medication, or have a heart, kidney, sleep, or other medical condition.
+        All Trip Considered is not liable for any damages arising from use of this app.
+        <button type="button" class="link-btn" data-open-legal>Full disclaimer</button>
       </p>
     </section>
   </main>
 
   <footer class="site-footer">
+    <p class="footer-legal">
+      Not health or medical advice. Provided as is, without warranties. Use at your own risk.
+      <button type="button" class="link-btn" data-open-legal>Disclaimer and limitation of liability</button>
+    </p>
     <p>
       &copy; <span id="year">2026</span>
       <a href="https://github.com/alvin-lam/jet-lag-recovery" target="_blank" rel="noopener">All Trip Considered</a>.
       All rights reserved.
     </p>
   </footer>
+
+  <!-- ============ DISCLAIMER ============ -->
+  <dialog id="legal-dialog" class="sheet legal" aria-labelledby="legal-h">
+    <h2 id="legal-h">Disclaimer and limitation of liability</h2>
+    <div class="legal-body">
+      <p><strong>Please read before using All Trip Considered.</strong></p>
+      <h3>Not health or medical advice</h3>
+      <p>All Trip Considered and everything it shows, including sleep times, light exposure, caffeine, melatonin,
+        hydration, exercise, meal, and nap suggestions, are general information for educational purposes only.
+        Nothing in this app is medical, health, nutritional, or professional advice, and it is not a substitute for
+        advice, diagnosis, or treatment from a qualified health professional. Using this app does not create a doctor
+        and patient or any other professional relationship.</p>
+      <h3>Talk to a professional first</h3>
+      <p>Always consult a doctor, pharmacist, or other qualified professional before changing your sleep schedule,
+        caffeine or fluid intake, or before taking melatonin or any other supplement or medication. This is especially
+        important if you are pregnant or breastfeeding, are under 18, take any medication, or have a heart, kidney,
+        liver, sleep, mental health, or other medical condition. Never ignore professional advice or delay seeking it
+        because of something you read in this app.</p>
+      <h3>Emergencies</h3>
+      <p>This app is not for emergencies. If you have chest pain, shortness of breath, leg pain or swelling,
+        confusion, or any other urgent symptom, contact emergency services or a doctor right away.</p>
+      <h3>Estimates only</h3>
+      <p>Plans are estimates produced by a simplified model and your own inputs. Individual responses vary. Time zone
+        data comes from your device and may be out of date. We do not guarantee that any information is accurate,
+        complete, current, or suitable for you.</p>
+      <h3>No warranties</h3>
+      <p>The app is provided "as is" and "as available," without warranties of any kind, express or implied,
+        including warranties of merchantability, fitness for a particular purpose, accuracy, and non-infringement.</p>
+      <h3>Limitation of liability</h3>
+      <p>To the fullest extent permitted by law, All Trip Considered and its creators, contributors, and affiliates
+        are not liable for any direct, indirect, incidental, special, consequential, or punitive damages, or for any
+        injury, illness, loss, or cost, arising from or related to your use of, or reliance on, this app or its
+        content. You use this app and act on its suggestions at your own risk and are solely responsible for your
+        health decisions.</p>
+      <h3>Your data</h3>
+      <p>Your inputs and sleep logs are stored only in this browser on this device. They are not sent to us.</p>
+      <p class="hint">Some jurisdictions do not allow certain warranty exclusions or liability limits, so parts of
+        this disclaimer may not apply to you.</p>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" id="legal-close">Close</button>
+      <button type="button" class="btn" id="legal-accept" autofocus>I understand and agree</button>
+    </div>
+  </dialog>
 
   <!-- ============ SLEEP CHECK-IN ============ -->
   <dialog id="checkin-dialog" class="sheet" aria-labelledby="checkin-h">
@@ -331,6 +387,6 @@
     </form>
   </dialog>
 
-  <script src="app.js" defer></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
