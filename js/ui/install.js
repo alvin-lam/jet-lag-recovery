@@ -25,7 +25,7 @@ const MANUAL = {
     steps: [
       `Tap the <strong>Share</strong> button ${SHARE_ICON}. In Safari it is in the toolbar; in other browsers it may be in the address bar or menu.`,
       'Scroll down and tap <strong>Add to Home Screen</strong>.',
-      'Tap <strong>Add</strong>. Jet Lag &amp; Recovery appears on your Home Screen and works offline.',
+      'Tap <strong>Add</strong>. Jet Lag appears on your Home Screen and works offline.',
     ],
   },
   android: {
@@ -34,7 +34,7 @@ const MANUAL = {
     steps: [
       `Open your browser menu ${MENU_ICON}.`,
       'Tap <strong>Add to Home screen</strong> or <strong>Install</strong>.',
-      'Confirm. Jet Lag &amp; Recovery appears on your Home screen and works offline.',
+      'Confirm. Jet Lag appears on your Home screen and works offline.',
     ],
   },
   mac: {
@@ -43,7 +43,7 @@ const MANUAL = {
     steps: [
       'In the Safari menu bar, choose <strong>File</strong>.',
       'Choose <strong>Add to Dock</strong>, then <strong>Add</strong>.',
-      'Jet Lag &amp; Recovery opens from your Dock like any other app and works offline.',
+      'Jet Lag opens from your Dock like any other app and works offline.',
     ],
   },
 };
