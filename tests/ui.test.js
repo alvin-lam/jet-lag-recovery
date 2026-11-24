@@ -195,3 +195,16 @@ test('layout lines up on desktop and phones, on every tab', async () => {
     await ctx.close();
   }
 });
+
+test('Travel Tools: list on phones, square buttons on desktop', async () => {
+  for (const [context, wide] of [[devices['iPhone 13'], false], [{ viewport: { width: 1280, height: 900 } }, true]]) {
+    const { page, ctx } = await openApp(browser, server.url, { trip: NY_LONDON, context });
+    const links = await page.$$eval('.travel-tools a', (a) => a.map((x) => [x.textContent.trim(), x.href]));
+    assert.equal(links.length, 5);
+    assert.deepEqual(links[0], ['💤Jet Lag', 'https://jetlag.alltripsconsidered.com/']);
+    const s = await page.$eval('.travel-tools a', (a) => ({ r: getComputedStyle(a).borderTopLeftRadius, d: getComputedStyle(a.closest('ul')).display }));
+    assert.equal(s.d, wide ? 'flex' : 'block');
+    if (wide) assert.equal(s.r, '0px');
+    await ctx.close();
+  }
+});
