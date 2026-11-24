@@ -45,19 +45,48 @@ function holidayWindows(y) {
   return w;
 }
 
-/** The active holiday for a local date, preferring the one whose main day is closest. */
-export function detectHoliday(now) {
+// US-only holidays are shown automatically only when the device is in a US time zone.
+const US_ONLY = new Set(['thanksgiving', 'independence']);
+const US_TZ = /^(America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Juneau|Sitka|Nome|Adak|Yakutat|Metlakatla|Menominee|Indiana\/|Kentucky\/|North_Dakota\/)|Pacific\/Honolulu$)/;
+
+/**
+ * The active holiday for a local date, preferring the one whose main day is closest.
+ * Pass the device time zone to skip regional holidays that do not apply there.
+ */
+export function detectHoliday(now, tz) {
+  const inUS = !tz || US_TZ.test(tz);
   const n = new Date(now);
   const today = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate());
   let best = null;
   let bestDist = Infinity;
   for (const [key, main, before, after] of holidayWindows(n.getFullYear())) {
+    if (!inUS && US_ONLY.has(key)) continue;
     if (today >= main - before * DAY_MS && today <= main + after * DAY_MS) {
       const dist = Math.abs(today - main);
       if (dist < bestDist) { best = key; bestDist = dist; }
     }
   }
   return best;
+}
+
+// Time zones south of (or on) the equator, where seasons are reversed. Matching the device's zone
+// avoids asking the user for their hemisphere and needs no location permission.
+const SOUTHERN_TZ = new RegExp('^(' + [
+  'Australia/', 'Antarctica/',
+  'Pacific/(Auckland|Chatham|Fiji|Tongatapu|Apia|Tahiti|Noumea|Efate|Port_Moresby|Bougainville|Guadalcanal|'
+    + 'Rarotonga|Niue|Norfolk|Pago_Pago|Fakaofo|Funafuti|Wallis|Marquesas|Gambier|Pitcairn|Easter|Galapagos)$',
+  'America/(Argentina/|Buenos_Aires|Santiago|Punta_Arenas|Sao_Paulo|Montevideo|Asuncion|La_Paz|Lima|Guayaquil|'
+    + 'Bahia|Recife|Fortaleza|Maceio|Belem|Araguaina|Cuiaba|Campo_Grande|Porto_Velho|Rio_Branco|Eirunepe|'
+    + 'Manaus|Noronha|Santarem)',
+  'Africa/(Johannesburg|Maputo|Harare|Lusaka|Lubumbashi|Windhoek|Gaborone|Maseru|Mbabane|Blantyre|Luanda|'
+    + 'Dar_es_Salaam|Kinshasa|Brazzaville|Bujumbura|Kigali|Nairobi)$',
+  'Indian/(Antananarivo|Mauritius|Reunion|Mayotte|Comoro|Kerguelen|Chagos|Cocos|Christmas|Mahe)$',
+  'Asia/(Jakarta|Makassar|Jayapura|Dili)$',
+  'Atlantic/(St_Helena|South_Georgia|Stanley)$',
+].join('|') + ')');
+
+export function hemisphereForTz(tz) {
+  return SOUTHERN_TZ.test(tz) ? 'south' : 'north';
 }
 
 // Meteorological seasons by month index (0 = January), Northern Hemisphere.

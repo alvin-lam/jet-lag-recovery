@@ -13,7 +13,9 @@ A progressive web app (PWA) that helps frequent flyers recover from jet lag. Ent
 - **Hydration estimates:** a daily water estimate based on weight, activity, climate, and alcohol, plus in-flight intake. Metric or imperial.
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
 - **Calendar export** (`.ics`) and print.
-- **Appearance menu:** light, dark, or system mode; seasonal themes with hemisphere support; automatic or manual holiday themes; and decoration controls.
+- **Appearance menu** (palette icon in the header): light, dark, or system mode, plus automatic or manual season and holiday themes. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
+- **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. Setting both season and holiday to None turns decorations off. Animation stops when the device asks for reduced motion.
+- **Back to top** button in the lower right once you scroll past the header.
 - **Installable and offline:** works without a connection after the first visit.
 - **Private:** all data stays in the browser's local storage on your device.
 
@@ -59,6 +61,7 @@ js/
     checkin.js           Sleep log dialog
     appearance.js        Appearance menu and decorations
     legal.js             Disclaimer dialog
+    to-top.js            Back to top button
     tabs.js, dialog.js, ics.js
 ```
 

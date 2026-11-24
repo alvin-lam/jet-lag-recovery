@@ -234,6 +234,16 @@ output { font-weight: 700; color: var(--accent); }
 .btn-ghost:hover { border-color: var(--accent); filter: none; }
 .btn-sm { padding: 5px 12px; min-height: 34px; font-size: .85rem; }
 .icon-btn { padding: 6px 12px; }
+.round-btn {
+  width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.to-top {
+  position: fixed; z-index: 5; box-shadow: var(--shadow);
+  right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+  transition: opacity .2s, transform .2s;
+}
+.to-top[hidden] { display: none; }
 .form-actions { display: flex; justify-content: flex-end; }
 
 /* ========== Summary ========== */
@@ -351,9 +361,6 @@ dialog.sheet {
 dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
 .dialog-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.checks { display: grid; gap: 8px; }
-.checks label { display: flex; gap: 8px; align-items: center; min-height: 32px; }
-.checks input { width: 18px; height: 18px; }
 
 /* ========== Decorations ========== */
 .decor-garland {
@@ -381,7 +388,7 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
 .decor-corners { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
 .decor-corners span { position: absolute; font-size: 64px; opacity: .18; }
 .decor-corners .tl { top: 70px; left: 6px; transform: rotate(-12deg); }
-.decor-corners .br { bottom: 8px; right: 8px; transform: rotate(10deg); }
+.decor-corners .bl { bottom: 8px; left: 8px; transform: rotate(10deg); }
 @media (max-width: 600px) { .decor-corners span { font-size: 44px; } }
 
 @media (prefers-reduced-motion: reduce) {
@@ -393,7 +400,7 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
   .panel { padding: 14px; }
   .day { padding: 12px; }
   .seg span { font-size: .8rem; }
-  .header-actions .btn { padding: 8px 12px; }
+  .header-actions .btn:not(.round-btn) { padding: 8px 12px; }
   .tabs { display: grid; grid-template-columns: 1fr 1fr; border-radius: 18px; }
   .tabs [role="tab"] { border-radius: 14px; }
 }
@@ -401,7 +408,7 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
 /* ========== Print ========== */
 @media print {
   .inputs, .tabs, .pane-actions, .link-btn, .site-header .header-actions, .decor-garland,
-  .decor-particles, .decor-corners, .checkin-row, .legend { display: none !important; }
+  .decor-particles, .decor-corners, .checkin-row, .legend, .to-top { display: none !important; }
   .layout { grid-template-columns: 1fr; }
   .pane[hidden] { display: flex !important; }
   body { background: #fff; }

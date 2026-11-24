@@ -1,13 +1,19 @@
-// Appearance menu: color mode, seasonal and holiday themes, and decorations.
+// Appearance menu: color mode plus seasonal and holiday themes. Decorations follow the theme automatically:
+// holidays get the full set (garland, falling decorations, corner accents) and seasons get a lighter touch.
 import { $, $$ } from '../lib/util.js';
+import { deviceTimeZone } from '../lib/time.js';
 import { HOLIDAYS, SEASONS } from '../data/themes.js';
-import { detectHoliday, detectSeason } from '../core/calendar.js';
+import { detectHoliday, detectSeason, hemisphereForTz } from '../core/calendar.js';
 import { store, setAppearance } from '../state.js';
 import { openDialog, closeDialog } from './dialog.js';
 
 const DARK_BAR = '#101826';
-const LEVEL_NAMES = ['', 'Light', 'Medium', 'Festive'];
-const PARTICLES_PER_LEVEL = [0, 10, 18, 30];
+const DECOR = {
+  holiday: { garland: 26, particles: 18, corners: true },
+  season:  { garland: 0,  particles: 10, corners: true },
+};
+const deviceTz = deviceTimeZone();
+const hemisphere = hemisphereForTz(deviceTz);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -17,19 +23,18 @@ function setData(el, key, value) {
 }
 
 function resolveTheme(a, now) {
-  const season = a.season === 'auto' ? detectSeason(now, a.hemisphere) : a.season === 'none' ? null : a.season;
-  const holiday = a.holiday === 'auto' ? detectHoliday(now) : a.holiday === 'none' ? null : a.holiday;
-  return { season, holiday, emoji: (holiday ? HOLIDAYS[holiday] : season ? SEASONS[season] : null)?.emoji || [] };
+  const season = a.season === 'auto' ? detectSeason(now, hemisphere) : a.season === 'none' ? null : a.season;
+  const holiday = a.holiday === 'auto' ? detectHoliday(now, deviceTz) : a.holiday === 'none' ? null : a.holiday;
+  const theme = holiday ? HOLIDAYS[holiday] : season ? SEASONS[season] : null;
+  return { season, holiday, emoji: theme ? theme.emoji : [], decor: holiday ? DECOR.holiday : season ? DECOR.season : null };
 }
 
-function garlandHtml(emoji, level) {
-  const count = 14 + level * 6;
-  return Array.from({ length: count }, (_, i) => `<span class="g">${emoji[i % emoji.length]}</span>`).join('');
-}
+const garlandHtml = (emoji, count) =>
+  Array.from({ length: count }, (_, i) => `<span class="g">${emoji[i % emoji.length]}</span>`).join('');
 
 // Deterministic pseudo-random layout so decorations do not jump around on every change.
-function particlesHtml(emoji, level, animate) {
-  return Array.from({ length: PARTICLES_PER_LEVEL[level] }, (_, i) => {
+function particlesHtml(emoji, count, animate) {
+  return Array.from({ length: count }, (_, i) => {
     const style = [
       `left:${(i * 97.3) % 100}%`,
       animate ? '' : `top:${(i * 41) % 95}%`,
@@ -54,53 +59,51 @@ export function applyAppearance() {
   const a = store.appearance;
   const root = document.documentElement;
   const now = Date.now();
-  const { season, holiday, emoji } = resolveTheme(a, now);
-  const level = Number(a.intensity) || 2;
-  const animate = a.motion && !reducedMotion.matches;
-  const has = emoji.length > 0;
+  const { season, holiday, emoji, decor } = resolveTheme(a, now);
+  const animate = !reducedMotion.matches;
 
   setData(root, 'theme', a.mode === 'light' || a.mode === 'dark' ? a.mode : null);
   setData(root, 'season', season);
   setData(root, 'holiday', holiday);
 
   const garland = $('#decor-garland');
-  garland.innerHTML = a.garland && has ? garlandHtml(emoji, level) : '';
-  garland.classList.toggle('on', a.garland && has);
-  garland.classList.toggle('swing', a.garland && has && animate);
+  const showGarland = !!decor && decor.garland > 0;
+  garland.innerHTML = showGarland ? garlandHtml(emoji, decor.garland) : '';
+  garland.classList.toggle('on', showGarland);
+  garland.classList.toggle('swing', showGarland && animate);
 
   const particles = $('#decor-particles');
   particles.classList.toggle('static', !animate);
-  particles.innerHTML = a.particles && has ? particlesHtml(emoji, level, animate) : '';
+  particles.innerHTML = decor ? particlesHtml(emoji, decor.particles, animate) : '';
 
-  $('#decor-corners').innerHTML = a.corners && has
-    ? `<span class="tl">${emoji[0]}</span><span class="br">${emoji[1 % emoji.length]}</span>` : '';
+  $('#decor-corners').innerHTML = decor && decor.corners
+    ? `<span class="tl">${emoji[0]}</span><span class="bl">${emoji[1 % emoji.length]}</span>` : '';
 
-  const autoHoliday = detectHoliday(now);
+  const autoHoliday = detectHoliday(now, deviceTz);
   $('#holiday-hint').textContent = 'Automatic right now: '
     + (autoHoliday ? HOLIDAYS[autoHoliday].name : 'no holiday') + ', '
-    + SEASONS[detectSeason(now, a.hemisphere)].name.toLowerCase() + '.';
-  $('#intensity-out').textContent = LEVEL_NAMES[level];
+    + SEASONS[detectSeason(now, hemisphere)].name.toLowerCase()
+    + ` (${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere). Based on your device time zone.`;
   updateThemeColor(a.mode);
 }
 
 export function setupAppearance() {
   const form = $('#appearance-form');
   const dlg = $('#appearance-dialog');
-  const select = $('#holiday-select');
-  select.append(new Option('Automatic', 'auto'), new Option('None', 'none'),
+  $('#holiday-select').append(new Option('Automatic', 'auto'), new Option('None', 'none'),
     ...Object.entries(HOLIDAYS).map(([k, v]) => new Option(v.name, k)));
 
   const writeForm = () => {
     const a = store.appearance;
     for (const r of $$('input[name="mode"]', form)) r.checked = r.value === a.mode;
-    for (const k of ['season', 'hemisphere', 'holiday', 'intensity']) form.elements[k].value = a[k];
-    for (const k of ['garland', 'particles', 'corners', 'motion']) form.elements[k].checked = !!a[k];
+    form.elements.season.value = a.season;
+    form.elements.holiday.value = a.holiday;
   };
 
   form.addEventListener('input', (e) => {
     const t = e.target;
     if (!t.name || !(t.name in store.appearance)) return;
-    setAppearance({ [t.name]: t.type === 'checkbox' ? t.checked : t.name === 'intensity' ? Number(t.value) : t.value });
+    setAppearance({ [t.name]: t.value });
     applyAppearance();
   });
   $('#appearance-btn').addEventListener('click', () => { writeForm(); openDialog(dlg); });

@@ -19,10 +19,8 @@ export const TRIP_DEFAULTS = Object.freeze({
   strategy: 'auto', preDays: 0, pace: 1, clock: '12', volUnit: 'metric',
 });
 
-export const APPEARANCE_DEFAULTS = Object.freeze({
-  mode: 'system', season: 'auto', hemisphere: 'north', holiday: 'auto',
-  garland: true, particles: true, corners: true, motion: true, intensity: 2,
-});
+// Decorations follow the active season or holiday automatically, so only these choices are stored.
+export const APPEARANCE_DEFAULTS = Object.freeze({ mode: 'system', season: 'auto', holiday: 'auto' });
 
 // Circadian and wellness constants used by the plan model.
 export const MODEL = Object.freeze({

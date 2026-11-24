@@ -4,7 +4,7 @@ import { deviceTimeZone, localDateStr } from './lib/time.js';
 import { cityForTz, locKey } from './data/cities.js';
 import { store, setTrip, resetTrip, saveTripNow, nightsFor } from './state.js';
 import { buildPlan, tripSignature } from './core/model.js';
-import { detectHoliday, detectSeason } from './core/calendar.js';
+import { detectHoliday, detectSeason, hemisphereForTz } from './core/calendar.js';
 import { setupForm, writeForm } from './ui/form.js';
 import { renderHints, renderSummary, renderDays } from './ui/plan-view.js';
 import { renderFlight, renderWater, renderRecovery } from './ui/panes.js';
@@ -13,6 +13,7 @@ import { setupCheckin } from './ui/checkin.js';
 import { exportIcs } from './ui/ics.js';
 import { setupAppearance } from './ui/appearance.js';
 import { setupLegal } from './ui/legal.js';
+import { setupToTop } from './ui/to-top.js';
 import { setupPwa } from './pwa.js';
 
 const deviceTz = deviceTimeZone();
@@ -72,11 +73,12 @@ function init() {
   setupTabs();
   setupAppearance();
   setupLegal();
+  setupToTop();
   setupPwa();
   render();
 }
 
 // Expose pure functions for testing from a console or headless browser.
-window.ATC = { buildPlan, detectHoliday, detectSeason };
+window.ATC = { buildPlan, detectHoliday, detectSeason, hemisphereForTz };
 
 init(); // module scripts run after the document is parsed
