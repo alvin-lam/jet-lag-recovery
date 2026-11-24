@@ -530,3 +530,4 @@ dialog.sheet::backdrop { background: rgba(10, 15, 25, .45); }
   body { background: #fff; }
   .panel { box-shadow: none; break-inside: avoid; }
 }
+.noscript { max-width: 1200px; margin: 14px auto 0; position: relative; z-index: 2; }

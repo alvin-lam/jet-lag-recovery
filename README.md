@@ -35,9 +35,12 @@ By All Trips Considered. A progressive web app (PWA) that helps frequent flyers 
 index.html               Page markup, dialogs (disclaimer, sleep check-in, appearance)
 manifest.webmanifest     Install metadata
 sw.js                    Service worker (offline cache)
+robots.txt               Lets search engines crawl the site and points to the sitemap
+sitemap.xml              Page list for search engines
 css/
   styles.css             Theme tokens, season and holiday palettes, layout, decorations
 assets/icons/            App icons (SVG source and generated PNGs)
+assets/og-image.jpg      1200×630 preview image for shared links
 assets/fonts/            Instrument Serif for the title and copyright (SIL Open Font License, see OFL.txt)
 js/
   main.js                Entry point: wires state, model, and views
@@ -103,7 +106,6 @@ Do these before promoting the site, since they decide whether the live app works
 ### 2. Quality and tooling
 
 - [ ] **Automated tests in the repository.** Move the browser test scripts into the project and run them with GitHub Actions on every push. Cover the plan model (landing times, directions, sleep logs), device defaults, search, appearance, install reminder, and layout at phone and desktop widths.
-- [ ] **Link previews.** Add Open Graph and Twitter card tags plus a preview image, so shared links show a title, summary, and picture.
 - [ ] **Color contrast audit.** Check every season and holiday palette in light and dark mode against WCAG AA, and adjust colors that are too faint.
 - [ ] **Release automation.** Generate the service worker's cache version and file list automatically at release time, so installed apps always pick up updates.
 - [ ] **Pull request workflow.** If others will contribute, merge to `prod` through reviewed pull requests instead of pushing directly.
@@ -122,6 +124,7 @@ Do these before promoting the site, since they decide whether the live app works
 
 ### Done
 
+- [x] Search and sharing metadata: description, canonical URL, Open Graph and X (Twitter) link previews with a 1200×630 image, structured data, robots.txt, and sitemap.xml.
 - [x] Brand name set to All Trips Considered, with links to alltripsconsidered.com.
 - [x] Lunar New Year, Diwali, and Hanukkah dates extended through 2036.
 
@@ -139,6 +142,8 @@ When you change any cached file, bump `CACHE` in `sw.js` so installed copies upd
 ## Deploy
 
 Any static host works, including GitHub Pages. Publish the repository root.
+
+The site is served at `https://jetlag.alltripsconsidered.com/` (see `CNAME`). The canonical URL, Open Graph and X image URLs, structured data, `robots.txt`, and `sitemap.xml` all use that address, so update them together if the domain changes. Update `<lastmod>` in `sitemap.xml` when the page changes meaningfully.
 
 ## Disclaimer
 
