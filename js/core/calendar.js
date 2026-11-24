@@ -33,6 +33,7 @@ function holidayWindows(y) {
       ['valentine', D(2, 14), 7, 0],
       ['stpatrick', D(3, 17), 7, 0],
       ['easter', easterDate(y), 7, 1],
+      ['pride', D(6, 28), 27, 2], // all of June, centered on the Stonewall anniversary
       ['independence', D(7, 4), 6, 1],
       ['halloween', D(10, 31), 16, 0],
       ['diwali', fromTable(DIWALI, y), 5, 2],

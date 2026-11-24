@@ -1,7 +1,7 @@
 // Entry point: wires the store, the model and the views together.
 import { $, DAY_MS, debounce } from './lib/util.js';
 import { deviceTimeZone, localDateStr } from './lib/time.js';
-import { cityForTz, locKey } from './data/cities.js';
+import { locationForTz, migrateKey, parseLoc } from './data/locations.js';
 import { store, setTrip, resetTrip, saveTripNow, nightsFor } from './state.js';
 import { buildPlan, tripSignature } from './core/model.js';
 import { detectHoliday, detectSeason, hemisphereForTz } from './core/calendar.js';
@@ -23,14 +23,16 @@ let plan = null;
 function fillDeviceDefaults() {
   const t = store.trip;
   const patch = {};
-  if (!t.home) {
-    const city = cityForTz(deviceTz);
-    patch.home = city ? city.key : locKey('Your time zone', deviceTz);
+  // Upgrade "City|Zone" keys saved by earlier versions to airport keys.
+  for (const field of ['home', 'dest']) {
+    const upgraded = migrateKey(t[field]);
+    if (upgraded !== t[field]) patch[field] = upgraded;
   }
+  if (!t.home) patch.home = locationForTz(deviceTz).key;
   if (!t.dest) {
-    const homeKey = patch.home || t.home;
-    patch.dest = homeKey.includes('|America/') ? 'London|Europe/London' : 'New York|America/New_York';
-    if (patch.dest === homeKey) patch.dest = 'Tokyo|Asia/Tokyo';
+    const home = parseLoc(patch.home || t.home);
+    patch.dest = home.tz.startsWith('America/') ? 'code:LHR' : 'code:JFK';
+    if (parseLoc(patch.dest).tz === home.tz) patch.dest = 'code:HND';
   }
   if (!t.depDate) patch.depDate = localDateStr(deviceTz, Date.now() + 7 * DAY_MS);
   if (Object.keys(patch).length) setTrip(patch);
@@ -54,9 +56,10 @@ function render() {
 function init() {
   $('#year').textContent = new Date().getFullYear();
   fillDeviceDefaults();
+  saveTripNow(); // persist upgraded or newly filled defaults immediately
 
   const renderSoon = debounce(render, 60);
-  setupForm({ deviceTz, onChange: renderSoon });
+  setupForm({ onChange: renderSoon });
   writeForm();
 
   $('#reset-btn').addEventListener('click', () => {

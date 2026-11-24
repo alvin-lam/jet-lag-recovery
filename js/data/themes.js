@@ -1,25 +1,30 @@
 // Seasonal and holiday themes. Colors live in css/styles.css; this file holds names, emoji and dates.
+// `icon` is shown after the name in menus. `emoji` is the set used for decorations.
 
 export const HOLIDAYS = {
-  newyear:      { name: "New Year's",            emoji: ['🎆', '🎉', '🥂', '✨', '🎊'] },
-  lunar:        { name: 'Lunar New Year',        emoji: ['🧧', '🏮', '🐉', '🎊', '🍊'] },
-  valentine:    { name: "Valentine's Day",       emoji: ['❤️', '💕', '🌹', '💌', '💖'] },
-  stpatrick:    { name: "St. Patrick's Day",     emoji: ['☘️', '🍀', '🌈', '💚'] },
-  easter:       { name: 'Easter',                emoji: ['🐣', '🥚', '🌷', '🐰', '🌼'] },
-  independence: { name: 'Independence Day (US)', emoji: ['🎆', '🇺🇸', '✨', '🎇', '⭐'] },
-  halloween:    { name: 'Halloween',             emoji: ['🎃', '👻', '🦇', '🕸️', '🍬'] },
-  diwali:       { name: 'Diwali',                emoji: ['🪔', '✨', '🎇', '🌺', '🪷'] },
-  thanksgiving: { name: 'Thanksgiving (US)',     emoji: ['🦃', '🍂', '🥧', '🌽', '🍁'] },
-  hanukkah:     { name: 'Hanukkah',              emoji: ['🕎', '✨', '🔵', '⭐', '🍩'] },
-  christmas:    { name: 'Christmas',             emoji: ['🎄', '🎁', '❄️', '⭐', '🔔'] },
+  newyear:      { name: "New Year's",            icon: '🎆', emoji: ['🎆', '🎉', '🥂', '✨', '🎊'] },
+  lunar:        { name: 'Lunar New Year',        icon: '🧧', emoji: ['🧧', '🏮', '🐉', '🎊', '🍊'] },
+  valentine:    { name: "Valentine's Day",       icon: '❤️', emoji: ['❤️', '💕', '🌹', '💌', '💖'] },
+  stpatrick:    { name: "St. Patrick's Day",     icon: '☘️', emoji: ['☘️', '🍀', '🌈', '💚'] },
+  easter:       { name: 'Easter',                icon: '🐣', emoji: ['🐣', '🥚', '🌷', '🐰', '🌼'] },
+  pride:        { name: 'Pride Month',           icon: '🏳️‍🌈', emoji: ['🏳️‍🌈', '🌈', '❤️', '🧡', '💛', '💚', '💙', '💜'] },
+  independence: { name: 'Independence Day (US)', icon: '🇺🇸', emoji: ['🎆', '🇺🇸', '✨', '🎇', '⭐'] },
+  halloween:    { name: 'Halloween',             icon: '🎃', emoji: ['🎃', '👻', '🦇', '🕸️', '🍬'] },
+  diwali:       { name: 'Diwali',                icon: '🪔', emoji: ['🪔', '✨', '🎇', '🌺', '🪷'] },
+  thanksgiving: { name: 'Thanksgiving (US)',     icon: '🦃', emoji: ['🦃', '🍂', '🥧', '🌽', '🍁'] },
+  hanukkah:     { name: 'Hanukkah',              icon: '🕎', emoji: ['🕎', '✨', '🔵', '⭐', '🍩'] },
+  christmas:    { name: 'Christmas',             icon: '🎄', emoji: ['🎄', '🎁', '❄️', '⭐', '🔔'] },
 };
 
 export const SEASONS = {
-  spring: { name: 'Spring', emoji: ['🌸', '🌷', '🦋', '🌱', '🌼'] },
-  summer: { name: 'Summer', emoji: ['☀️', '🌴', '🌊', '🍉', '🕶️'] },
-  autumn: { name: 'Autumn', emoji: ['🍁', '🍂', '🍃', '🌰', '🍄'] },
-  winter: { name: 'Winter', emoji: ['❄️', '⛄', '🌨️', '🧣', '❄️'] },
+  spring: { name: 'Spring', icon: '🌸', emoji: ['🌸', '🌷', '🦋', '🌱', '🌼'] },
+  summer: { name: 'Summer', icon: '☀️', emoji: ['☀️', '🌴', '🌊', '🍉', '🕶️'] },
+  autumn: { name: 'Autumn', icon: '🍂', emoji: ['🍁', '🍂', '🍃', '🌰', '🍄'] },
+  winter: { name: 'Winter', icon: '❄️', emoji: ['❄️', '⛄', '🌨️', '🧣', '❄️'] },
 };
+
+/** "Christmas 🎄" style label used in menus and hints. */
+export const themeLabel = (t) => `${t.name} ${t.icon}`;
 
 // Lunisolar holidays have no simple formula. Values are [month, day] of the first day.
 export const LUNAR_NEW_YEAR = { 2025: [1, 29], 2026: [2, 17], 2027: [2, 6], 2028: [1, 26], 2029: [2, 13], 2030: [2, 3], 2031: [1, 23], 2032: [2, 11] };

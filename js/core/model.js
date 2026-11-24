@@ -9,7 +9,7 @@
  * Tmin advances the clock and light before Tmin delays it.
  */
 import { MODEL } from '../config.js';
-import { parseLoc } from '../data/cities.js';
+import { parseLoc } from '../data/locations.js';
 import { hm, mod24, clamp, nearest } from '../lib/util.js';
 import { zonedToUtc, tzOffset, localDateStr, localHours, addDays } from '../lib/time.js';
 import { subtractDaily } from '../lib/intervals.js';

@@ -1,39 +1,21 @@
-// Trip form: builds the location pickers, syncs inputs with the store and reports changes.
+// Trip form: location search boxes plus the other inputs, synced with the store.
 import { $, $$ } from '../lib/util.js';
-import { CITY_GROUPS, CITIES_BY_TZ, locKey, parseLoc } from '../data/cities.js';
-import { allTimeZones } from '../lib/time.js';
+import { createLocationPicker } from './location-picker.js';
 import { store, setTrip } from '../state.js';
 
 const NUMERIC = new Set(['durH', 'durM', 'tripDays', 'cups', 'weight', 'alcohol', 'preDays', 'pace']);
 const RADIOS = ['chrono', 'caffSens'];
 const KG_PER_LB = 0.4536;
 
-function buildLocationOptions(deviceTz) {
-  const frag = document.createDocumentFragment();
-  const group = (label, options) => {
-    const og = document.createElement('optgroup');
-    og.label = label;
-    for (const [text, value] of options) og.appendChild(new Option(text, value));
-    frag.appendChild(og);
-  };
-  if (!CITIES_BY_TZ.has(deviceTz)) {
-    group('Your device', [[`Your time zone (${deviceTz.replace(/_/g, ' ')})`, locKey('Your time zone', deviceTz)]]);
-  }
-  for (const [region, cities] of CITY_GROUPS) {
-    group(region, [...cities].sort((a, b) => a[0].localeCompare(b[0])).map(([n, tz]) => [n, locKey(n, tz)]));
-  }
-  const zones = allTimeZones();
-  if (zones.length) {
-    group('All time zones', zones.map((tz) => [tz.replace(/_/g, ' '), locKey(tz.split('/').pop().replace(/_/g, ' '), tz)]));
-  }
-  return frag;
-}
+let pickers = [];
 
-export function setupForm({ deviceTz, onChange }) {
-  // Build the long option list once and clone it for the second picker.
-  const options = buildLocationOptions(deviceTz);
-  $('#dest').appendChild(options.cloneNode(true));
-  $('#home').appendChild(options);
+export function setupForm({ onChange }) {
+  // The location fields are search boxes. They have no name attribute, so the generic
+  // handler below ignores them and each picker reports its own selection.
+  pickers = ['home', 'dest'].map((field) => createLocationPicker($('#' + field), {
+    getKey: () => store.trip[field],
+    onSelect: (key) => { setTrip({ [field]: key }); onChange(); },
+  }));
 
   const handle = (e) => {
     const t = e.target;
@@ -64,15 +46,10 @@ export function setupForm({ deviceTz, onChange }) {
 export function writeForm() {
   const t = store.trip;
   for (const el of $$('#trip-form select, #trip-form input:not([type=radio])')) {
-    if (!(el.name in t)) continue;
-    const val = String(t[el.name]);
-    // Keep a saved zone selectable even if it is not in the current list.
-    if (el.tagName === 'SELECT' && !el.querySelector(`option[value="${CSS.escape(val)}"]`)) {
-      el.appendChild(new Option(parseLoc(val).name, val));
-    }
-    el.value = val;
+    if (el.name in t) el.value = String(t[el.name]);
   }
   for (const name of RADIOS) for (const r of $$(`input[name="${name}"]`)) r.checked = r.value === t[name];
+  for (const p of pickers) p.sync();
   updateOutputs();
 }
 

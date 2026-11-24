@@ -54,14 +54,24 @@
       <form id="trip-form" autocomplete="off" novalidate>
         <fieldset>
           <legend>Flight</legend>
-          <label class="field">
-            <span>Departing from</span>
-            <select id="home" name="home"></select>
-          </label>
-          <label class="field">
-            <span>Arriving in</span>
-            <select id="dest" name="dest"></select>
-          </label>
+          <div class="field combo">
+            <label for="home">Departing from</label>
+            <input id="home" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+              aria-controls="home-list" aria-describedby="loc-help" data-status="loc-status"
+              autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search"
+              placeholder="City, airport, or code (e.g. JFK)">
+            <ul id="home-list" class="combo-list" role="listbox" aria-label="Departure locations" hidden></ul>
+          </div>
+          <div class="field combo">
+            <label for="dest">Arriving in</label>
+            <input id="dest" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+              aria-controls="dest-list" aria-describedby="loc-help" data-status="loc-status"
+              autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search"
+              placeholder="City, airport, or code (e.g. LHR)">
+            <ul id="dest-list" class="combo-list" role="listbox" aria-label="Arrival locations" hidden></ul>
+          </div>
+          <p id="loc-help" class="visually-hidden">Type a city, airport name, or airport code, then choose from the list.</p>
+          <p id="loc-status" class="visually-hidden" aria-live="polite"></p>
           <div class="row-2">
             <label class="field">
               <span>Departure date</span>
@@ -357,14 +367,7 @@
       <div class="row-2">
         <label class="field">
           <span>Season</span>
-          <select name="season">
-            <option value="auto">Automatic</option>
-            <option value="spring">Spring</option>
-            <option value="summer">Summer</option>
-            <option value="autumn">Autumn</option>
-            <option value="winter">Winter</option>
-            <option value="none">None</option>
-          </select>
+          <select name="season" id="season-select"></select>
         </label>
         <label class="field">
           <span>Holiday</span>

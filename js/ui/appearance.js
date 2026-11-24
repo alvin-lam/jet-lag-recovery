@@ -2,7 +2,7 @@
 // holidays get the full set (garland, falling decorations, corner accents) and seasons get a lighter touch.
 import { $, $$ } from '../lib/util.js';
 import { deviceTimeZone } from '../lib/time.js';
-import { HOLIDAYS, SEASONS } from '../data/themes.js';
+import { HOLIDAYS, SEASONS, themeLabel } from '../data/themes.js';
 import { detectHoliday, detectSeason, hemisphereForTz } from '../core/calendar.js';
 import { store, setAppearance } from '../state.js';
 import { openDialog, closeDialog } from './dialog.js';
@@ -81,8 +81,8 @@ export function applyAppearance() {
 
   const autoHoliday = detectHoliday(now, deviceTz);
   $('#holiday-hint').textContent = 'Automatic right now: '
-    + (autoHoliday ? HOLIDAYS[autoHoliday].name : 'no holiday') + ', '
-    + SEASONS[detectSeason(now, hemisphere)].name.toLowerCase()
+    + (autoHoliday ? themeLabel(HOLIDAYS[autoHoliday]) : 'no holiday') + ', '
+    + themeLabel(SEASONS[detectSeason(now, hemisphere)])
     + ` (${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere). Based on your device time zone.`;
   updateThemeColor(a.mode);
 }
@@ -90,8 +90,11 @@ export function applyAppearance() {
 export function setupAppearance() {
   const form = $('#appearance-form');
   const dlg = $('#appearance-dialog');
-  $('#holiday-select').append(new Option('Automatic', 'auto'), new Option('None', 'none'),
-    ...Object.entries(HOLIDAYS).map(([k, v]) => new Option(v.name, k)));
+  // Menu labels carry an emoji after each name, for example "Winter ❄️" and "Pride Month 🏳️‍🌈".
+  const fill = (select, themes) => select.append(new Option('Automatic', 'auto'), new Option('None', 'none'),
+    ...Object.entries(themes).map(([k, v]) => new Option(themeLabel(v), k)));
+  fill($('#season-select'), SEASONS);
+  fill($('#holiday-select'), HOLIDAYS);
 
   const writeForm = () => {
     const a = store.appearance;

@@ -6,14 +6,15 @@ A progressive web app (PWA) that helps frequent flyers recover from jet lag. Ent
 
 ## Features
 
-- **Interactive trip input:** pick departure and arrival cities (or any time zone), flight time, trip length, and your usual bedtime, wake time, and chronotype.
+- **Location search:** type a city, airport name, IATA code (`LHR`), metro code (`NYC`, `LON`), former name (`Bombay`, `Saigon`), or country. About 230 major airports are built in, and any time zone works as a fallback. Fully keyboard and screen reader accessible.
+- **Interactive trip input:** flight time, trip length, and your usual bedtime, wake time, and chronotype.
 - **Adaptive daily plan:** each day gets a 24-hour timeline showing sleep, when to seek or avoid bright light, the caffeine window, and water reminders.
 - **Sleep check-ins:** log how you actually slept. The rest of the plan shifts to match your real progress.
 - **Adjustable output:** choose a strategy (gradual, immediate, or stay on home time), pre-adjust up to 3 days before departure, and set the adjustment pace.
 - **Hydration estimates:** a daily water estimate based on weight, activity, climate, and alcohol, plus in-flight intake. Metric or imperial.
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
 - **Calendar export** (`.ics`) and print.
-- **Appearance menu** (palette icon in the header): light, dark, or system mode, plus automatic or manual season and holiday themes. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
+- **Appearance menu** (palette icon in the header): light, dark, or system mode, plus automatic or manual season and holiday themes, each shown with an emoji (for example Winter ❄️, Pride Month 🏳️‍🌈). Pride Month runs through June. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
 - **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. Setting both season and holiday to None turns decorations off. Animation stops when the device asks for reduced motion.
 - **Back to top** button in the lower right once you scroll past the header.
 - **Installable and offline:** works without a connection after the first visit.
@@ -42,7 +43,8 @@ js/
   state.js               The single store for trip, sleep logs, and appearance
   pwa.js                 Service worker registration and install button
   data/
-    cities.js            City list with O(1) lookup maps
+    airports.js          Major airports: code, city, country, time zone, aliases
+    locations.js         Location keys, lookups, and ranked search index
     themes.js            Holiday and season names, emoji, and lunisolar dates
   lib/
     util.js              Small shared helpers
@@ -62,6 +64,7 @@ js/
     appearance.js        Appearance menu and decorations
     legal.js             Disclaimer dialog
     to-top.js            Back to top button
+    location-picker.js   Search box (combobox) for departure and arrival
     tabs.js, dialog.js, ics.js
 ```
 
@@ -69,7 +72,7 @@ js/
 
 - **One store.** `js/state.js` owns everything that is saved. Saved data is filtered to known keys on load, and trip writes are debounced.
 - **Pure model.** `core/model.js` takes plain inputs and returns a plan object. It never touches the page, so it is easy to test.
-- **Indexed lookups.** Cities are indexed by key and by time zone in `Map`s. Parsed locations, `Intl` formatters, and yearly holiday dates are cached.
+- **Indexed lookups.** Airports are indexed by key and by time zone in `Map`s, and normalized search fields are built once at load time. Parsed locations, `Intl` formatters, and yearly holiday dates are cached.
 - **Exact interval math.** Light windows are clipped against sleep with interval subtraction rather than sampling.
 - **Constants in one place.** Shift rates, caffeine limits, and hydration factors live in `MODEL` in `js/config.js`.
 - **Per-trip sleep logs.** Logs are keyed by a trip signature, so changing the trip never applies old logs to a new plan.
