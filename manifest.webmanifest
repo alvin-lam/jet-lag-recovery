@@ -1,7 +1,7 @@
 {
-  "name": "Jet Lag",
+  "name": "Jet Lag & Recovery",
   "short_name": "Jet Lag",
-  "description": "Jet Lag by All Trips Considered: plan sleep, caffeine, light, and hydration to recover from jet lag faster.",
+  "description": "Jet Lag & Recovery by All Trips Considered: plan sleep, caffeine, light, and hydration to recover from jet lag faster.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
