@@ -1,7 +1,7 @@
-// Appearance: color mode, plus a fully automatic theme. The colors follow the season by default and
-// switch to a holiday's colors while that holiday is on. Decorations follow the same theme: holidays
-// get the full set (garland, falling decorations, corner accents) and seasons a lighter touch. The
-// only theme setting is whether to show decorations at all.
+// Appearance: color mode and theme. The theme menu has Automatic (the season, switching to a holiday's
+// colors while one is on) plus two groups to pick from: Seasons and Holidays. Decorations follow the
+// theme: holidays get the full set (garland, falling decorations, corner accents) and seasons a lighter
+// touch, and one switch turns them off.
 import { $, $$ } from '../lib/util.js';
 import { deviceTimeZone } from '../lib/time.js';
 import { HOLIDAYS, SEASONS, themeLabel } from '../data/themes.js';
@@ -24,11 +24,36 @@ function setData(el, key, value) {
   else delete el.dataset[key];
 }
 
-/** The theme for a moment: the season always, and a holiday on top while one is on. */
-export function currentTheme(now = Date.now()) {
-  const season = detectSeason(now, hemisphere);
-  const holiday = detectHoliday(now, deviceTz);
+/**
+ * The theme to show for a choice:
+ *   'auto'              the current season, switching to a holiday while one is on
+ *   'season'            the current season only
+ *   'season:<key>'      one season, all year
+ *   'holiday:<key>'     one holiday, all year
+ */
+export function currentTheme(choice = 'auto', now = Date.now()) {
+  const [kind, key] = String(choice).split(':');
+  let season = detectSeason(now, hemisphere);
+  let holiday = null;
+  if (kind === 'auto') holiday = detectHoliday(now, deviceTz);
+  else if (kind === 'season' && SEASONS[key]) season = key;
+  else if (kind === 'holiday' && HOLIDAYS[key]) holiday = key;
   return { season, holiday, emoji: (holiday ? HOLIDAYS[holiday] : SEASONS[season]).emoji, decor: holiday ? DECOR.holiday : DECOR.season };
+}
+
+/** Theme menu: Automatic first, then a Seasons group and a Holidays group. */
+function buildThemeMenu(select) {
+  const group = (label, entries) => {
+    const og = document.createElement('optgroup');
+    og.label = label;
+    for (const [value, text] of entries) og.appendChild(new Option(text, value));
+    return og;
+  };
+  select.append(
+    new Option('Automatic (seasons and holidays)', 'auto'),
+    group('Seasons', [['season', 'Current season'], ...Object.entries(SEASONS).map(([k, t]) => ['season:' + k, themeLabel(t)])]),
+    group('Holidays', Object.entries(HOLIDAYS).map(([k, t]) => ['holiday:' + k, themeLabel(t)])),
+  );
 }
 
 const garlandHtml = (emoji, count) =>
@@ -60,7 +85,7 @@ function updateThemeColor(mode) {
 export function applyAppearance() {
   const a = store.appearance;
   const root = document.documentElement;
-  const { season, holiday, emoji, decor } = currentTheme();
+  const { season, holiday, emoji, decor } = currentTheme(a.theme);
   const animate = !reducedMotion.matches;
   const show = a.decorations !== false;
 
@@ -81,26 +106,27 @@ export function applyAppearance() {
   $('#decor-corners').innerHTML = show && decor.corners
     ? `<span class="tl">${emoji[0]}</span><span class="bl">${emoji[1 % emoji.length]}</span>` : '';
 
-  $('#theme-now').textContent = holiday
-    ? `${themeLabel(HOLIDAYS[holiday])}, during ${themeLabel(SEASONS[season]).toLowerCase()}`
-    : themeLabel(SEASONS[season]);
+  $('#theme-now').textContent = holiday ? themeLabel(HOLIDAYS[holiday]) : themeLabel(SEASONS[season]);
   updateThemeColor(a.mode);
 }
 
 export function setupAppearance() {
   const form = $('#appearance-form');
   const dlg = $('#appearance-dialog');
-  $('#theme-where').textContent = `${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere seasons, from your device time zone.`;
+  buildThemeMenu($('#theme-select'));
+  $('#theme-where').textContent = `Automatic uses ${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere seasons, from your device time zone.`;
 
   const writeForm = () => {
     for (const r of $$('input[name="mode"]', form)) r.checked = r.value === store.appearance.mode;
     form.elements.decorations.checked = store.appearance.decorations !== false;
+    form.elements.theme.value = store.appearance.theme;
   };
 
   form.addEventListener('input', (e) => {
     const t = e.target;
     if (t.name === 'mode') setAppearance({ mode: t.value });
     else if (t.name === 'decorations') setAppearance({ decorations: t.checked });
+    else if (t.name === 'theme') setAppearance({ theme: t.value });
     else return;
     applyAppearance();
   });

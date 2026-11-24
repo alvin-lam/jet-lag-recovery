@@ -145,6 +145,20 @@ test('theme is automatic: season by default, holiday while one is on', async () 
   assert.equal(ds.holiday, 'christmas');
   await xmas.page.click('#appearance-btn');
   assert.match(await xmas.page.textContent('#theme-now'), /Christmas/);
+  // The menu separates seasons and holidays, and the choice sticks.
+  const groups = await xmas.page.$$eval('#theme-select optgroup', (g) => g.map((x) => x.label));
+  assert.deepEqual(groups, ['Seasons', 'Holidays']);
+  await xmas.page.selectOption('#theme-select', 'season:summer'); await settle(xmas.page);
+  assert.deepEqual(await xmas.page.evaluate(() => ({ ...document.documentElement.dataset })), { season: 'summer' });
+  await xmas.page.selectOption('#theme-select', 'holiday:pride'); await settle(xmas.page);
+  assert.equal(await xmas.page.evaluate(() => document.documentElement.dataset.holiday), 'pride');
+  await xmas.page.selectOption('#theme-select', 'season'); await settle(xmas.page);
+  assert.deepEqual(await xmas.page.evaluate(() => ({ ...document.documentElement.dataset })), { season: 'winter' }, 'current season, no holiday');
+  await xmas.page.selectOption('#theme-select', 'holiday:halloween'); await settle(xmas.page);
+  await xmas.page.reload(); await xmas.page.waitForSelector('.day');
+  assert.equal(await xmas.page.evaluate(() => document.documentElement.dataset.holiday), 'halloween', 'choice is saved');
+  assert.equal(await xmas.page.inputValue('#theme-select'), 'holiday:halloween');
+  await xmas.page.click('#appearance-btn');
   await xmas.page.uncheck('input[name=decorations]'); await settle(xmas.page);
   assert.equal(await xmas.page.$eval('#decor-particles', (e) => e.children.length), 0);
   await xmas.ctx.close();

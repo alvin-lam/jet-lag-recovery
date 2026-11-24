@@ -544,8 +544,6 @@ details.optional > div:last-child { padding-bottom: 4px; }
 details.optional .hint:last-child { margin-bottom: 12px; }
 @media (prefers-reduced-motion: reduce) { details.optional > summary::before { transition: none; } }
 
-/* Appearance: current automatic theme */
-.theme-now { margin: 2px 0 0; font-size: 1.05rem; font-weight: 650; }
 
 /* Today card */
 .today { border-left: 4px solid var(--accent); }
