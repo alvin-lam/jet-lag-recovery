@@ -3,6 +3,7 @@
 export const STORAGE_KEYS = {
   trip: 'atc-state',
   checkins: 'atc-checkins',
+  retCheckins: 'atc-ret-checkins', // sleep logs for the return leg
   appearance: 'atc-appearance',
   disclaimer: 'atc-disclaimer',
   installNag: 'atc-install-dismissed', // when the Add to Home Screen reminder was last dismissed

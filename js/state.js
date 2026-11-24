@@ -33,6 +33,8 @@ export const store = {
   trip: pick(TRIP_DEFAULTS, upgradeTrip(load(STORAGE_KEYS.trip, null))),
   // Sleep logs: { sig: trip signature, nights: { [dayNumber]: { bed: 'HH:MM', wake: 'HH:MM' } } }
   checkins: load(STORAGE_KEYS.checkins, { sig: '', nights: {} }),
+  // Same shape, for the return leg. Kept separate so the two legs' day numbers never collide.
+  retCheckins: load(STORAGE_KEYS.retCheckins, { sig: '', nights: {} }),
   appearance: pick(APPEARANCE_DEFAULTS, load(STORAGE_KEYS.appearance, null)),
 };
 
@@ -52,21 +54,28 @@ export function setTrip(patch) {
 export function resetTrip() {
   store.trip = { ...TRIP_DEFAULTS };
   store.checkins = { sig: '', nights: {} };
+  store.retCheckins = { sig: '', nights: {} };
   save(STORAGE_KEYS.checkins, store.checkins);
+  save(STORAGE_KEYS.retCheckins, store.retCheckins);
 }
 
 export function saveTripNow() { save(STORAGE_KEYS.trip, store.trip); }
 
-export function setCheckin(sig, day, entry) {
-  if (store.checkins.sig !== sig) store.checkins = { sig, nights: {} };
-  if (entry) store.checkins.nights[day] = entry;
-  else delete store.checkins.nights[day];
-  save(STORAGE_KEYS.checkins, store.checkins);
+// leg is 'out' (outbound trip) or 'return'.
+const LOGS = { out: ['checkins', STORAGE_KEYS.checkins], return: ['retCheckins', STORAGE_KEYS.retCheckins] };
+
+export function setCheckin(sig, day, entry, leg = 'out') {
+  const [prop, key] = LOGS[leg];
+  if (store[prop].sig !== sig) store[prop] = { sig, nights: {} };
+  if (entry) store[prop].nights[day] = entry;
+  else delete store[prop].nights[day];
+  save(key, store[prop]);
 }
 
-/** Logs for the given trip, or none if they belong to a different trip. */
-export function nightsFor(sig) {
-  return store.checkins.sig === sig ? store.checkins.nights : {};
+/** Logs for the given trip leg, or none if they belong to a different trip. */
+export function nightsFor(sig, leg = 'out') {
+  const logs = store[LOGS[leg][0]];
+  return logs.sig === sig ? logs.nights : {};
 }
 
 export function setAppearance(patch) {

@@ -307,7 +307,12 @@ const dayNumber = (dateStr) => {
  * Only that amount has to be undone, so a short trip spent on home time needs little or no recovery.
  * Returns null when no return is planned, or { error } when the return date does not work.
  */
-export function buildReturnPlan(trip, outbound) {
+/** Identifies the return leg; its sleep logs only apply while the trip and return flight are unchanged. */
+export function returnSignature(t) {
+  return [tripSignature(t), t.retDate, t.retTime, t.retDurH, t.retDurM].join('~');
+}
+
+export function buildReturnPlan(trip, outbound, nights = {}) {
   if (!trip.ret) return null;
   if (!trip.retDate) return { error: 'Choose a return date.' };
   const dayIndex = dayNumber(trip.retDate) - dayNumber(outbound.arrDate); // 0 = arrival day
@@ -331,7 +336,7 @@ export function buildReturnPlan(trip, outbound) {
     strategy: trip.strategy === 'home' ? 'auto' : trip.strategy,
     preDays: 0,
   };
-  const plan = buildPlan(back, {}, { bodyShift: -moved });
+  const plan = buildPlan(back, nights, { bodyShift: -moved });
   plan.isReturn = true;
   plan.adjustedBeforeReturn = Math.abs(moved);
   plan.outboundShift = Math.abs(outbound.target);

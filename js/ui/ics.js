@@ -19,7 +19,11 @@ function sleepStart(date, bed, tz) {
   return zonedToUtc(mod24(bed) < 12 ? addDays(date, 1) : date, mod24(quarter(bed)), tz);
 }
 
-export function exportIcs(p) {
+/**
+ * @param {object} p     the outbound plan
+ * @param {object} [back] the return plan, when one is planned; its sleep times are added too
+ */
+export function exportIcs(p, back) {
   const now = stamp(Date.now());
   const events = [];
   const add = (start, hours, summary, desc) => events.push(
@@ -33,6 +37,12 @@ export function exportIcs(p) {
   for (const d of p.days) {
     add(sleepStart(d.date, d.bed, p.dest.tz), d.night || p.sleepLen, 'Sleep in ' + p.dest.name,
       `Jet Lag & Recovery: last caffeine ${fmtTime(d.caff.cutoff)}.`);
+  }
+  if (back && !back.error) {
+    for (const d of back.days) {
+      add(sleepStart(d.date, d.bed, back.dest.tz), d.night || back.sleepLen, 'Sleep (back home in ' + back.dest.name + ')',
+        `Jet Lag & Recovery, return trip: last caffeine ${fmtTime(d.caff.cutoff)}.`);
+    }
   }
 
   const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//All Trips Considered//Jet Lag & Recovery//EN',

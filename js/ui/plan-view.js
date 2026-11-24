@@ -153,8 +153,8 @@ function dayCard(p, d, today, nowHour) {
       d.nap && ['💤', napText(d.nap)],
       ['💧', `Drink <strong>${fmtVol(w.base + w.flight)}</strong> today${w.flight ? ' including the flight' : ''}, about a glass every ${w.every === 1 ? 'hour' : w.every + ' hours'}.`],
     ])}
-    ${p.strategy === 'none' || p.isReturn ? '' : `<div class="checkin-row">
-      <button type="button" class="btn btn-ghost btn-sm" data-checkin="${d.k}">${d.log ? 'Edit sleep log' : 'Log tonight’s sleep'}</button>${logged}</div>`}
+    ${p.strategy === 'none' ? '' : `<div class="checkin-row">
+      <button type="button" class="btn btn-ghost btn-sm" data-checkin="${d.k}" data-leg="${p.isReturn ? 'return' : 'out'}">${d.log ? 'Edit sleep log' : 'Log tonight’s sleep'}</button>${logged}</div>`}
   </article>`;
 }
 

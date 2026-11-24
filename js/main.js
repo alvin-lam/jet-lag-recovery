@@ -4,7 +4,7 @@ import { deviceTimeZone, localDateStr } from './lib/time.js';
 import { devicePrefs } from './lib/locale.js';
 import { locationForTz, migrateKey, parseLoc } from './data/locations.js';
 import { store, setTrip, resetTrip, saveTripNow, nightsFor } from './state.js';
-import { buildPlan, buildReturnPlan, tripSignature } from './core/model.js';
+import { buildPlan, buildReturnPlan, tripSignature, returnSignature } from './core/model.js';
 import { detectHoliday, detectSeason, hemisphereForTz } from './core/calendar.js';
 import { setupForm, writeForm } from './ui/form.js';
 import { renderHints, renderSummary, renderDays } from './ui/plan-view.js';
@@ -21,6 +21,7 @@ import { setupPwa } from './pwa.js';
 
 const deviceTz = deviceTimeZone();
 let plan = null;
+let back = null; // return plan (Preview), or null when no return is planned
 
 /** Fill in trip fields that depend on the device: home city, a sensible destination and a date. */
 function fillDeviceDefaults() {
@@ -65,8 +66,8 @@ function render() {
 
 /** Return trip (Preview): its own tab, built from where the outbound plan leaves the body clock. */
 function renderReturn() {
-  let back = null;
-  try { back = buildReturnPlan(store.trip, plan); } catch (err) { console.error(err); back = { error: 'This return trip could not be planned.' }; }
+
+  try { back = buildReturnPlan(store.trip, plan, nightsFor(returnSignature(store.trip), 'return')); } catch (err) { console.error(err); back = { error: 'This return trip could not be planned.' }; }
   setTabVisible('tab-return', !!back);
   const hint = $('#ret-hint');
   if (!back) { hint.textContent = ''; return; }
@@ -97,9 +98,11 @@ function init() {
     writeForm();
     render();
   });
-  $('#ics-btn').addEventListener('click', () => plan && exportIcs(plan));
+  const exportBoth = () => plan && exportIcs(plan, back);
+  $('#ics-btn').addEventListener('click', exportBoth);
+  $('#ret-ics-btn').addEventListener('click', exportBoth);
 
-  setupCheckin({ getPlan: () => plan, onChange: render });
+  setupCheckin({ getPlan: (leg) => (leg === 'return' ? back : plan), onChange: render });
   setupTabs();
   setupAppearance();
   setupLegal();
