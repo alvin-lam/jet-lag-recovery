@@ -14,7 +14,7 @@ By All Trip Considered. A progressive web app (PWA) that helps frequent flyers r
 - **Hydration estimates:** a daily water estimate based on weight, activity, climate, and alcohol, plus in-flight intake. Metric or imperial.
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
 - **Calendar export** (`.ics`) and print.
-- **Appearance menu** (palette icon in the header): light, dark, or system mode, plus automatic or manual season and holiday themes, each shown with an emoji (for example Winter ❄️, Pride Month 🏳️‍🌈). Pride Month runs through June. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
+- **Appearance menu** (palette icon in the header): light, dark, or system mode, plus season and holiday themes chosen from rows of emoji icons (✨ Automatic, each theme such as Winter ❄️ or Pride Month 🏳️‍🌈, and 🚫 None). Hovering shows each name, and the current choice is named above each row. Pride Month runs through June. The hemisphere for seasons comes from the device time zone, and US-only holidays appear automatically only in US time zones.
 - **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. Setting both season and holiday to None turns decorations off. Animation stops when the device asks for reduced motion.
 - **Back to top** button in the lower right once you scroll past the header.
 - **Installable and offline:** works without a connection after the first visit.

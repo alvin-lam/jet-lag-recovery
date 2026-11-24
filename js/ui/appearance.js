@@ -1,6 +1,6 @@
 // Appearance menu: color mode plus seasonal and holiday themes. Decorations follow the theme automatically:
 // holidays get the full set (garland, falling decorations, corner accents) and seasons get a lighter touch.
-import { $, $$ } from '../lib/util.js';
+import { $, $$, esc } from '../lib/util.js';
 import { deviceTimeZone } from '../lib/time.js';
 import { HOLIDAYS, SEASONS, themeLabel } from '../data/themes.js';
 import { detectHoliday, detectSeason, hemisphereForTz } from '../core/calendar.js';
@@ -8,6 +8,9 @@ import { store, setAppearance } from '../state.js';
 import { openDialog, closeDialog } from './dialog.js';
 
 const DARK_BAR = '#101826';
+// Extra choices shown before and after the themed icons in each picker.
+const AUTO = { name: 'Automatic', icon: '✨' };
+const NONE = { name: 'None', icon: '🚫' };
 const DECOR = {
   holiday: { garland: 26, particles: 18, corners: true },
   season:  { garland: 0,  particles: 10, corners: true },
@@ -84,23 +87,35 @@ export function applyAppearance() {
     + (autoHoliday ? themeLabel(HOLIDAYS[autoHoliday]) : 'no holiday') + ', '
     + themeLabel(SEASONS[detectSeason(now, hemisphere)])
     + ` (${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere). Based on your device time zone.`;
+  // Name the current choice above each icon grid; for Automatic, also say what it resolves to.
+  const describe = (choice, themes, resolved) => (choice === 'auto'
+    ? `Automatic${resolved ? ': ' + themeLabel(themes[resolved]) : ': none right now'}`
+    : choice === 'none' ? 'None' : themeLabel(themes[choice]));
+  $('#season-name').textContent = describe(a.season, SEASONS, season);
+  $('#holiday-name').textContent = describe(a.holiday, HOLIDAYS, holiday);
   updateThemeColor(a.mode);
+}
+
+/** A row of radio tiles: Automatic, each theme's emoji, then None. Arrow keys move between tiles. */
+function iconGrid(field, themes) {
+  const tile = (value, t) => `<label class="icon-tile" title="${esc(t.name)}">
+      <input type="radio" name="${field}" value="${value}">
+      <span class="tile-icon" aria-hidden="true">${t.icon}</span><span class="visually-hidden">${esc(t.name)}</span>
+    </label>`;
+  return [tile('auto', AUTO), ...Object.entries(themes).map(([k, t]) => tile(k, t)), tile('none', NONE)].join('');
 }
 
 export function setupAppearance() {
   const form = $('#appearance-form');
   const dlg = $('#appearance-dialog');
-  // Menu labels carry an emoji after each name, for example "Winter ❄️" and "Pride Month 🏳️‍🌈".
-  const fill = (select, themes) => select.append(new Option('Automatic', 'auto'), new Option('None', 'none'),
-    ...Object.entries(themes).map(([k, v]) => new Option(themeLabel(v), k)));
-  fill($('#season-select'), SEASONS);
-  fill($('#holiday-select'), HOLIDAYS);
+  $('#season-grid').innerHTML = iconGrid('season', SEASONS);
+  $('#holiday-grid').innerHTML = iconGrid('holiday', HOLIDAYS);
 
   const writeForm = () => {
     const a = store.appearance;
-    for (const r of $$('input[name="mode"]', form)) r.checked = r.value === a.mode;
-    form.elements.season.value = a.season;
-    form.elements.holiday.value = a.holiday;
+    for (const name of ['mode', 'season', 'holiday']) {
+      for (const r of $$(`input[name="${name}"]`, form)) r.checked = r.value === a[name];
+    }
   };
 
   form.addEventListener('input', (e) => {

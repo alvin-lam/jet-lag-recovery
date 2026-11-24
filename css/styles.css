@@ -374,6 +374,31 @@ table.water th { color: var(--muted); font-weight: 650; font-size: .8rem; text-t
   font: inherit; font-weight: 650; color: var(--accent); background: none; border: 0; padding: 0;
   text-decoration: underline; cursor: pointer;
 }
+/* Season and holiday icon pickers */
+.icon-pick { margin: 6px 0 12px; }
+.icon-pick legend {
+  text-transform: none; letter-spacing: 0; font-size: .92rem; font-weight: 600; color: var(--text); margin: 8px 0 6px;
+}
+.pick-name { font-weight: 500; color: var(--muted); margin-left: 6px; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 6px; }
+.icon-tile { position: relative; cursor: pointer; }
+.icon-tile input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.tile-icon {
+  display: flex; align-items: center; justify-content: center; height: 46px; font-size: 24px; line-height: 1;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2);
+  transition: transform .12s, border-color .12s, background .12s;
+}
+.icon-tile:hover .tile-icon { border-color: var(--accent); transform: translateY(-1px); }
+.icon-tile input:checked + .tile-icon {
+  border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.icon-tile input:focus-visible + .tile-icon { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .tile-icon { transition: none; }
+  .icon-tile:hover .tile-icon { transform: none; }
+}
+
 .footer-legal { font-size: .82rem; margin-bottom: 6px !important; }
 dialog.legal { width: min(640px, calc(100vw - 32px)); }
 dialog.legal > h2 { margin-bottom: 12px; }

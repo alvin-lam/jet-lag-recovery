@@ -366,16 +366,14 @@
         </div>
       </div>
 
-      <div class="row-2">
-        <label class="field">
-          <span>Season</span>
-          <select name="season" id="season-select"></select>
-        </label>
-        <label class="field">
-          <span>Holiday</span>
-          <select name="holiday" id="holiday-select"></select>
-        </label>
-      </div>
+      <fieldset class="icon-pick">
+        <legend>Season <span class="pick-name" id="season-name"></span></legend>
+        <div class="icon-grid" id="season-grid"></div>
+      </fieldset>
+      <fieldset class="icon-pick">
+        <legend>Holiday <span class="pick-name" id="holiday-name"></span></legend>
+        <div class="icon-grid" id="holiday-grid"></div>
+      </fieldset>
       <p class="hint" id="holiday-hint"></p>
       <p class="hint">Decorations change automatically with the season and holidays. Choose None for both to turn them off.</p>
     </form>
