@@ -42,17 +42,27 @@ export function setupForm({ onChange }) {
       patch.weight = Math.round(v === 'lb' ? store.trip.weight / KG_PER_LB : store.trip.weight * KG_PER_LB);
       $('#weight').value = patch.weight;
     }
-    // First time the return is turned on: suggest the day after the trip ends and the outbound flight length.
-    if (t.name === 'ret' && v) {
+    setTrip(patch);
+    updateOutputs();
+    onChange();
+  };
+
+  // The return flight section is collapsible: opening it plans the return, closing it turns it off.
+  const retSection = $('#ret-section');
+  retSection.addEventListener('toggle', () => {
+    const on = retSection.open;
+    if (on === !!store.trip.ret) return; // writeForm sets open; ignore that echo
+    const patch = { ret: on };
+    // First time: suggest the day after the trip ends and the outbound flight length.
+    if (on) {
       const s = store.trip;
       if (!s.retDate) patch.retDate = addDays(s.depDate, (Number(s.tripDays) || 7) + 1);
       if (s.retDurH == null) { patch.retDurH = s.durH; patch.retDurM = s.durM; }
     }
     setTrip(patch);
-    if (t.name === 'ret') writeForm();
-    updateOutputs();
+    writeForm();
     onChange();
-  };
+  });
   $('#water-standard').addEventListener('click', () => {
     setTrip({ personalWater: false });
     $('#water-personal').open = false;
@@ -87,7 +97,7 @@ function updateOutputs() {
   $('#pre-out').textContent = t.preDays;
   const pace = Number(t.pace);
   $('#pace-out').textContent = pace < 0.75 ? 'Gentle' : pace < 1 ? 'Easy' : pace === 1 ? 'Standard' : pace <= 1.25 ? 'Brisk' : 'Aggressive';
-  $('#ret-fields').hidden = !t.ret;
+  $('#ret-section').open = !!t.ret;
   $('#water-personal-hint').textContent = t.personalWater
     ? 'Your water target uses these details.'
     : 'Using standard advice for adults. Change any field below to personalize your water target.';

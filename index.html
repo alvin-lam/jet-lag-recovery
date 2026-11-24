@@ -167,10 +167,10 @@
           <p class="hint" id="arrival-hint" aria-live="polite"></p>
         </fieldset>
 
-        <fieldset>
-          <legend>Return flight <span class="preview-badge">Preview</span></legend>
-          <label class="check-row"><input type="checkbox" id="ret" name="ret"> Plan my return trip</label>
-          <div id="ret-fields" hidden>
+        <details id="ret-section" class="optional">
+          <summary>Return flight <span class="preview-badge">Preview</span> <small>(optional)</small></summary>
+          <p class="hint">Open this to plan your trip home too. Close it to turn the return plan off; your details are kept.</p>
+          <div id="ret-fields">
             <div class="row-2">
               <label class="field">
                 <span>Return date</span>
@@ -193,7 +193,7 @@
             </div>
             <p class="hint" id="ret-hint" aria-live="polite"></p>
           </div>
-        </fieldset>
+        </details>
 
         <fieldset>
           <legend>Your normal sleep</legend>

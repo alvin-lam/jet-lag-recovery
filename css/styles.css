@@ -538,7 +538,10 @@ details.optional[open] > summary::before { transform: rotate(45deg); }
 details.optional > :not(summary) { margin-left: 12px; margin-right: 12px; }
 details.optional > .hint { margin-top: 0; margin-bottom: 10px; }
 details.optional > .btn { margin-bottom: 12px; }
-details.optional input[type="number"], details.optional select { background-color: var(--surface); }
+details.optional input[type="number"], details.optional input[type="date"], details.optional input[type="time"], details.optional select { background-color: var(--surface); }
+#ret-section { margin-bottom: 14px; }
+details.optional > div:last-child { padding-bottom: 4px; }
+details.optional .hint:last-child { margin-bottom: 12px; }
 @media (prefers-reduced-motion: reduce) { details.optional > summary::before { transition: none; } }
 
 /* Appearance: current automatic theme */

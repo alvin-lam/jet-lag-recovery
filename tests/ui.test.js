@@ -84,7 +84,7 @@ test('water target is standard until personalized', async () => {
 test('return trip: plan, sleep logs and calendar export', async () => {
   const { page, ctx, errors } = await openApp(browser, server.url, { trip: NY_LONDON, context: { acceptDownloads: true } });
   assert.equal(await page.isVisible('#tab-return'), false);
-  await page.check('#ret'); await settle(page);
+  await page.click('#ret-section summary'); await settle(page);
   assert.equal(await page.isVisible('#tab-return'), true);
   await page.click('#tab-return');
   const sync = () => page.$eval('#ret-summary .stat:nth-child(3) .v', (e) => e.textContent);
@@ -98,6 +98,15 @@ test('return trip: plan, sleep logs and calendar export', async () => {
   const ics = await readFile(await dl.path(), 'utf8');
   assert.ok((ics.match(/SUMMARY:Sleep \(back home/g) || []).length >= 1);
   assert.ok(ics.includes('Not medical or health advice'));
+  // Closing the section turns the return off; reopening keeps the details.
+  const date = await page.inputValue('#retDate');
+  await page.click('#ret-section summary'); await settle(page);
+  assert.equal(await page.isVisible('#tab-return'), false);
+  await page.click('#ret-section summary'); await settle(page);
+  assert.equal(await page.isVisible('#tab-return'), true);
+  assert.equal(await page.inputValue('#retDate'), date);
+  await page.reload(); await page.waitForSelector('.day');
+  assert.equal(await page.$eval('#ret-section', (d) => d.open), true, 'stays open after reload');
   assert.deepEqual(errors, []);
   await ctx.close();
 });
@@ -146,7 +155,7 @@ test('layout lines up on desktop and phones, on every tab', async () => {
     devices['iPhone 13'], { viewport: { width: 320, height: 640 } }];
   for (const context of sizes) {
     const { page, ctx, errors } = await openApp(browser, server.url, { trip: NY_LONDON, context });
-    await page.check('#ret'); await settle(page);
+    await page.click('#ret-section summary'); await settle(page);
     await page.click('#more-options summary');
     for (const tab of ['plan', 'flight', 'water', 'recovery', 'return']) {
       await page.click('#tab-' + tab);
