@@ -10,6 +10,7 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 - **Interactive trip input:** flight time, trip length, and your usual bedtime, wake time, and chronotype.
 - **Adaptive daily plan:** each day gets a 24-hour timeline showing sleep, when to seek or avoid bright light, the caffeine window, and water reminders.
 - **Sleep check-ins:** log how you actually slept. The rest of the plan shifts to match your real progress.
+- **Return trip planning (Preview):** add a return flight to get a plan for coming home. It starts from where your body clock is on the return day, so a fully adjusted trip reverses the whole shift, a short trip only undoes part of it, and a trip kept on home time needs little recovery. Sleep logs and calendar export cover the outbound trip only for now.
 - **Adjustable output:** choose a strategy (gradual, immediate, or stay on home time), pre-adjust up to 3 days before departure, and set the adjustment pace.
 - **Hydration estimates:** a daily water estimate based on weight, activity, climate, and alcohol, plus in-flight intake. Metric or imperial.
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
@@ -95,7 +96,7 @@ Open work, in rough priority order. Check items off as they ship.
 
 ### 1. Features for frequent flyers
 
-- [ ] **Return trips and connections.** Plan the return leg and multi-leg trips with layovers in one itinerary.
+- [ ] **Return trips and connections.** Return planning is in Preview. Still to do: sleep logs and calendar export for the return leg, and multi-leg trips with layovers.
 - [ ] **Saved trips.** Keep several trips and switch between them.
 - [ ] **Reminders.** Alert travelers when to seek light, stop caffeine, and go to bed. Reliable notifications likely need a small server; the calendar export covers part of this today.
 

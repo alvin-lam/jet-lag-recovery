@@ -1,15 +1,16 @@
 // Entry point: wires the store, the model and the views together.
-import { $, DAY_MS, debounce } from './lib/util.js';
+import { $, DAY_MS, debounce, esc } from './lib/util.js';
 import { deviceTimeZone, localDateStr } from './lib/time.js';
 import { devicePrefs } from './lib/locale.js';
 import { locationForTz, migrateKey, parseLoc } from './data/locations.js';
 import { store, setTrip, resetTrip, saveTripNow, nightsFor } from './state.js';
-import { buildPlan, tripSignature } from './core/model.js';
+import { buildPlan, buildReturnPlan, tripSignature } from './core/model.js';
 import { detectHoliday, detectSeason, hemisphereForTz } from './core/calendar.js';
 import { setupForm, writeForm } from './ui/form.js';
 import { renderHints, renderSummary, renderDays } from './ui/plan-view.js';
 import { renderFlight, renderWater, renderRecovery } from './ui/panes.js';
-import { setupTabs } from './ui/tabs.js';
+import { setupTabs, setTabVisible } from './ui/tabs.js';
+import { fmtDate, fmtTime } from './ui/format.js';
 import { setupCheckin } from './ui/checkin.js';
 import { exportIcs } from './ui/ics.js';
 import { setupAppearance } from './ui/appearance.js';
@@ -59,6 +60,25 @@ function render() {
   renderFlight(plan);
   renderWater(plan);
   renderRecovery(plan);
+  renderReturn();
+}
+
+/** Return trip (Preview): its own tab, built from where the outbound plan leaves the body clock. */
+function renderReturn() {
+  let back = null;
+  try { back = buildReturnPlan(store.trip, plan); } catch (err) { console.error(err); back = { error: 'This return trip could not be planned.' }; }
+  setTabVisible('tab-return', !!back);
+  const hint = $('#ret-hint');
+  if (!back) { hint.textContent = ''; return; }
+  if (back.error) {
+    hint.textContent = back.error;
+    $('#ret-summary').innerHTML = `<p>${esc(back.error)}</p>`;
+    $('#ret-days').innerHTML = '';
+    return;
+  }
+  hint.innerHTML = `Lands <strong>${esc(fmtDate(back.arrDate))} at ${fmtTime(back.arrHour)}</strong> ${esc(back.dest.name)} time. See the Return tab.`;
+  renderSummary(back, '#ret-summary');
+  renderDays(back, '#ret-days');
 }
 
 function init() {

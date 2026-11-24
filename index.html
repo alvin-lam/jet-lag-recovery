@@ -167,6 +167,34 @@
         </fieldset>
 
         <fieldset>
+          <legend>Return flight <span class="preview-badge">Preview</span></legend>
+          <label class="check-row"><input type="checkbox" id="ret" name="ret"> Plan my return trip</label>
+          <div id="ret-fields" hidden>
+            <div class="row-2">
+              <label class="field">
+                <span>Return date</span>
+                <input type="date" id="retDate" name="retDate">
+              </label>
+              <label class="field">
+                <span>Departure time <small>(local)</small></span>
+                <input type="time" id="retTime" name="retTime">
+              </label>
+            </div>
+            <div class="row-2">
+              <label class="field">
+                <span>Flight length <small>(hours)</small></span>
+                <input type="number" id="retDurH" name="retDurH" min="0" max="23" step="1" inputmode="numeric">
+              </label>
+              <label class="field">
+                <span>Minutes</span>
+                <input type="number" id="retDurM" name="retDurM" min="0" max="59" step="5" inputmode="numeric">
+              </label>
+            </div>
+            <p class="hint" id="ret-hint" aria-live="polite"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
           <legend>Your normal sleep</legend>
           <div class="row-2">
             <label class="field">
@@ -299,6 +327,7 @@
         <button role="tab" id="tab-flight" aria-controls="pane-flight" aria-selected="false" tabindex="-1">On the flight</button>
         <button role="tab" id="tab-water" aria-controls="pane-water" aria-selected="false" tabindex="-1">Hydration</button>
         <button role="tab" id="tab-recovery" aria-controls="pane-recovery" aria-selected="false" tabindex="-1">Recovery</button>
+        <button role="tab" id="tab-return" aria-controls="pane-return" aria-selected="false" tabindex="-1" hidden>Return <span class="preview-badge">Preview</span></button>
       </div>
 
       <div id="pane-plan" role="tabpanel" aria-labelledby="tab-plan" class="pane">
@@ -318,6 +347,12 @@
       <div id="pane-flight" role="tabpanel" aria-labelledby="tab-flight" class="pane" hidden></div>
       <div id="pane-water" role="tabpanel" aria-labelledby="tab-water" class="pane" hidden></div>
       <div id="pane-recovery" role="tabpanel" aria-labelledby="tab-recovery" class="pane" hidden></div>
+      <div id="pane-return" role="tabpanel" aria-labelledby="tab-return" class="pane" hidden>
+        <p class="notice preview-note"><span class="preview-badge">Preview</span> Return trip planning is new. It assumes you
+          follow the outbound plan while away. Log sleep and calendar export cover the outbound trip only for now.</p>
+        <div id="ret-summary" class="panel summary"></div>
+        <div id="ret-days"></div>
+      </div>
 
       <p class="disclaimer">
         Jet Lag &amp; Recovery provides general information based on published sleep and circadian research. It is not

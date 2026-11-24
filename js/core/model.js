@@ -131,8 +131,11 @@ function hydration({ dailyMl, dayFrac, flightH, wake, bed }) {
  * Build the full plan.
  * @param {object} trip   trip inputs (see TRIP_DEFAULTS)
  * @param {object} nights sleep logs for this trip, keyed by day number: { [k]: { bed, wake } }
+ * @param {object} [opts]
+ * @param {number} [opts.bodyShift] hours the body clock must shift, when it differs from the clock change
+ *   (used by the return leg, where the body may only be partly adjusted to the destination)
  */
-export function buildPlan(trip, nights = {}) {
+export function buildPlan(trip, nights = {}, opts = {}) {
   const home = parseLoc(trip.home);
   const dest = parseLoc(trip.dest);
   const homeBed = hm(trip.bed);
@@ -147,7 +150,7 @@ export function buildPlan(trip, nights = {}) {
   const offHome = tzOffset(home.tz, depUtc);
   const offDest = tzOffset(dest.tz, arrUtc);
   const clockDiff = (offDest - offHome) / 60;
-  const shift = wrapShift(clockDiff);
+  const shift = wrapShift(opts.bodyShift ?? clockDiff);
 
   // Shift rates, adjusted for chronotype and the user's chosen pace.
   const chrono = MODEL.chrono[trip.chrono] || MODEL.chrono.neutral;
@@ -291,4 +294,46 @@ export function buildPlan(trip, nights = {}) {
     adjustedDay,
     severity: severityOf(absT, sign),
   };
+}
+
+const dayNumber = (dateStr) => {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return Date.UTC(y, m - 1, d) / 86400000;
+};
+
+/**
+ * Plan the flight home (Preview). The traveler starts the return leg with the body clock wherever the
+ * outbound plan left it on the departure day: fully adjusted, partly adjusted, or still on home time.
+ * Only that amount has to be undone, so a short trip spent on home time needs little or no recovery.
+ * Returns null when no return is planned, or { error } when the return date does not work.
+ */
+export function buildReturnPlan(trip, outbound) {
+  if (!trip.ret) return null;
+  if (!trip.retDate) return { error: 'Choose a return date.' };
+  const dayIndex = dayNumber(trip.retDate) - dayNumber(outbound.arrDate); // 0 = arrival day
+  if (dayIndex < 0) return { error: 'The return date is before you arrive. Choose a later date.' };
+
+  // How far the body clock has moved toward destination time by the return day.
+  let moved;
+  if (outbound.strategy === 'home') moved = 0;
+  else if (outbound.strategy === 'none') moved = outbound.target;
+  else {
+    const day = outbound.days[dayIndex];
+    moved = day ? outbound.target - day.behind : outbound.target; // past the plan: fully adjusted
+  }
+
+  const back = {
+    ...trip,
+    home: trip.dest, dest: trip.home,
+    depDate: trip.retDate, depTime: trip.retTime,
+    durH: trip.retDurH ?? trip.durH, durM: trip.retDurM ?? trip.durM,
+    tripDays: 30,                       // home again: no "stay on home time" shortcut
+    strategy: trip.strategy === 'home' ? 'auto' : trip.strategy,
+    preDays: 0,
+  };
+  const plan = buildPlan(back, {}, { bodyShift: -moved });
+  plan.isReturn = true;
+  plan.adjustedBeforeReturn = Math.abs(moved);
+  plan.outboundShift = Math.abs(outbound.target);
+  return plan;
 }

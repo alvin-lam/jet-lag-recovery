@@ -20,6 +20,8 @@ export const TRIP_DEFAULTS = Object.freeze({
   activity: 'moderate', climate: 'temperate', alcohol: 0,
   // 'auto' follows the device: its 12- or 24-hour clock, and metric or US units.
   strategy: 'auto', preDays: 0, pace: 1, clock: 'auto', volUnit: 'auto',
+  // Return trip (Preview). Date and flight length are filled in when the return is first turned on.
+  ret: false, retDate: null, retTime: '17:00', retDurH: null, retDurM: null,
   v: 3, // settings version, used for one-time upgrades of saved settings (see state.js)
 });
 

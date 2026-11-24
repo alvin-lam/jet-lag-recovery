@@ -3,8 +3,9 @@ import { $, $$ } from '../lib/util.js';
 import { createLocationPicker } from './location-picker.js';
 import { store, setTrip } from '../state.js';
 import { devicePrefs } from '../lib/locale.js';
+import { addDays } from '../lib/time.js';
 
-const NUMERIC = new Set(['durH', 'durM', 'tripDays', 'cups', 'weight', 'alcohol', 'preDays', 'pace']);
+const NUMERIC = new Set(['durH', 'durM', 'tripDays', 'cups', 'weight', 'alcohol', 'preDays', 'pace', 'retDurH', 'retDurM']);
 const RADIOS = ['chrono', 'caffSens'];
 const KG_PER_LB = 0.4536;
 
@@ -26,7 +27,7 @@ export function setupForm({ onChange }) {
   const handle = (e) => {
     const t = e.target;
     if (!t.name || !(t.name in store.trip)) return;
-    let v = t.value;
+    let v = t.type === 'checkbox' ? t.checked : t.value;
     if ((t.type === 'date' || t.type === 'time') && !v) return;
     if (NUMERIC.has(t.name)) {
       v = Number(v);
@@ -38,7 +39,14 @@ export function setupForm({ onChange }) {
       patch.weight = Math.round(v === 'lb' ? store.trip.weight / KG_PER_LB : store.trip.weight * KG_PER_LB);
       $('#weight').value = patch.weight;
     }
+    // First time the return is turned on: suggest the day after the trip ends and the outbound flight length.
+    if (t.name === 'ret' && v) {
+      const s = store.trip;
+      if (!s.retDate) patch.retDate = addDays(s.depDate, (Number(s.tripDays) || 7) + 1);
+      if (s.retDurH == null) { patch.retDurH = s.durH; patch.retDurM = s.durM; }
+    }
     setTrip(patch);
+    if (t.name === 'ret') writeForm();
     updateOutputs();
     onChange();
   };
@@ -52,7 +60,9 @@ export function setupForm({ onChange }) {
 export function writeForm() {
   const t = store.trip;
   for (const el of $$('#trip-form select, #trip-form input:not([type=radio])')) {
-    if (el.name in t) el.value = String(t[el.name]);
+    if (!(el.name in t)) continue;
+    if (el.type === 'checkbox') el.checked = !!t[el.name];
+    else el.value = t[el.name] == null ? '' : String(t[el.name]);
   }
   for (const name of RADIOS) for (const r of $$(`input[name="${name}"]`)) r.checked = r.value === t[name];
   for (const p of pickers) p.sync();
@@ -66,4 +76,5 @@ function updateOutputs() {
   $('#pre-out').textContent = t.preDays;
   const pace = Number(t.pace);
   $('#pace-out').textContent = pace < 0.75 ? 'Gentle' : pace < 1 ? 'Easy' : pace === 1 ? 'Standard' : pace <= 1.25 ? 'Brisk' : 'Aggressive';
+  $('#ret-fields').hidden = !t.ret;
 }

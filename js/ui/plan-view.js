@@ -16,7 +16,11 @@ export function renderHints(p) {
 }
 
 function strategyText(p) {
-  if (p.strategy === 'none') return 'The time difference is small. Keep your normal routine.';
+  if (p.strategy === 'none') {
+    return p.isReturn && p.outboundShift >= 1
+      ? 'Your body clock stayed on home time while you were away, so you should settle back in quickly. Keep your normal routine.'
+      : 'The time difference is small. Keep your normal routine.';
+  }
   if (p.strategy === 'home') return `Your trip is short, so stay on ${p.home.name} time and plan activities around it.`;
   const dir = p.sign > 0 ? 'advance (sleep earlier)' : 'delay (sleep later)';
   const longWay = Math.sign(p.target) !== Math.sign(p.clockDiff)
@@ -28,11 +32,19 @@ function strategyText(p) {
   return main + longWay + pre;
 }
 
-export function renderSummary(p) {
+export function renderSummary(p, target = '#summary') {
   const adjusted = p.adjustedDay ? p.days[p.adjustedDay - 1] : null;
   const stat = (k, v, s) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
   const first = p.days[0];
-  $('#summary').innerHTML = `
+  // Return leg: explain how much of the outbound shift has to be undone.
+  let returnNote = '';
+  if (p.isReturn && p.outboundShift >= 1 && p.adjustedBeforeReturn >= 0.5) {
+    const full = p.outboundShift - p.adjustedBeforeReturn < 0.5;
+    returnNote = `<p class="callout">${full
+      ? `By the time you fly home, your body clock has fully adjusted to ${esc(p.home.name)} time, so the whole ${fmtHours(p.outboundShift)} shift is reversed.`
+      : `By the time you fly home, your body clock has adjusted about ${fmtHours(p.adjustedBeforeReturn)} of the ${fmtHours(p.outboundShift)} shift, so only that part needs to be undone.`}</p>`;
+  }
+  $(target).innerHTML = `
     <h3>${esc(p.home.name)} → ${esc(p.dest.name)}</h3>
     <p class="route">${fmtOffset(p.offHome)} to ${fmtOffset(p.offDest)} · ${fmtDur(p.durH)} flight ·
       <span class="badge ${p.severity.key}">${p.severity.label} jet lag</span></p>
@@ -45,7 +57,7 @@ export function renderSummary(p) {
         adjusted && isShifting(p) ? 'Back in sync by ' + esc(fmtDate(adjusted.date)) : isShifting(p) ? 'Beyond this plan' : 'Not shifting')}
       ${stat('First night', fmtTime(first.bed), 'Wake ' + fmtTime(first.wake))}
     </div>
-    <p class="callout">${esc(strategyText(p))}</p>`;
+    <p class="callout">${esc(strategyText(p))}</p>${returnNote}`;
 }
 
 function preDayCard(p, d, daysOut) {
@@ -141,16 +153,16 @@ function dayCard(p, d, today, nowHour) {
       d.nap && ['💤', napText(d.nap)],
       ['💧', `Drink <strong>${fmtVol(w.base + w.flight)}</strong> today${w.flight ? ' including the flight' : ''}, about a glass every ${w.every === 1 ? 'hour' : w.every + ' hours'}.`],
     ])}
-    ${p.strategy === 'none' ? '' : `<div class="checkin-row">
+    ${p.strategy === 'none' || p.isReturn ? '' : `<div class="checkin-row">
       <button type="button" class="btn btn-ghost btn-sm" data-checkin="${d.k}">${d.log ? 'Edit sleep log' : 'Log tonight’s sleep'}</button>${logged}</div>`}
   </article>`;
 }
 
-export function renderDays(p) {
+export function renderDays(p, target = '#days') {
   const now = Date.now();
   const today = localDateStr(p.dest.tz, now);
   const nowHour = localHours(p.dest.tz, now);
-  $('#days').innerHTML = [
+  $(target).innerHTML = [
     ...p.pre.map((d, i) => preDayCard(p, d, p.pre.length - i)),
     flightCard(p),
     ...p.days.map((d) => dayCard(p, d, today, nowHour)),
