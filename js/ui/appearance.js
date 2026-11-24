@@ -1,4 +1,4 @@
-// Appearance: color mode and theme. The theme menu has Automatic (the season, switching to a holiday's
+// Appearance: color mode and theme. The theme picker has Automatic (the season, switching to a holiday's
 // colors while one is on) plus two groups to pick from: Seasons and Holidays. Decorations follow the
 // theme: holidays get the full set (garland, falling decorations, corner accents) and seasons a lighter
 // touch, and one switch turns them off.
@@ -41,19 +41,15 @@ export function currentTheme(choice = 'auto', now = Date.now()) {
   return { season, holiday, emoji: (holiday ? HOLIDAYS[holiday] : SEASONS[season]).emoji, decor: holiday ? DECOR.holiday : DECOR.season };
 }
 
-/** Theme menu: Automatic first, then a Seasons group and a Holidays group. */
-function buildThemeMenu(select) {
-  const group = (label, entries) => {
-    const og = document.createElement('optgroup');
-    og.label = label;
-    for (const [value, text] of entries) og.appendChild(new Option(text, value));
-    return og;
-  };
-  select.append(
-    new Option('Automatic (seasons and holidays)', 'auto'),
-    group('Seasons', [['season', 'Current season'], ...Object.entries(SEASONS).map(([k, t]) => ['season:' + k, themeLabel(t)])]),
-    group('Holidays', Object.entries(HOLIDAYS).map(([k, t]) => ['holiday:' + k, themeLabel(t)])),
-  );
+/** Theme picker: icon buttons (radio inputs) for Automatic, then a Seasons row and a Holidays row. */
+function buildThemePicker(box) {
+  const icon = (value, glyph, name) =>
+    `<label class="theme-icon" title="${name}"><input type="radio" name="theme" value="${value}" aria-label="${name}"><span aria-hidden="true">${glyph}</span></label>`;
+  const row = (label, items) => `<fieldset class="theme-row"><legend>${label}</legend>${items.join('')}</fieldset>`;
+  box.innerHTML =
+    row('Automatic', [icon('auto', '✨', 'Automatic (seasons and holidays)'), icon('season', '🗓️', 'Current season')]) +
+    row('Seasons', Object.entries(SEASONS).map(([k, t]) => icon('season:' + k, t.icon, t.name))) +
+    row('Holidays', Object.entries(HOLIDAYS).map(([k, t]) => icon('holiday:' + k, t.icon, t.name)));
 }
 
 const garlandHtml = (emoji, count) =>
@@ -113,13 +109,13 @@ export function applyAppearance() {
 export function setupAppearance() {
   const form = $('#appearance-form');
   const dlg = $('#appearance-dialog');
-  buildThemeMenu($('#theme-select'));
+  buildThemePicker($('#theme-picker'));
   $('#theme-where').textContent = `Automatic uses ${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere seasons, from your device time zone.`;
 
   const writeForm = () => {
     for (const r of $$('input[name="mode"]', form)) r.checked = r.value === store.appearance.mode;
     form.elements.decorations.checked = store.appearance.decorations !== false;
-    form.elements.theme.value = store.appearance.theme;
+    for (const r of $$('input[name="theme"]', form)) r.checked = r.value === store.appearance.theme;
   };
 
   form.addEventListener('input', (e) => {
