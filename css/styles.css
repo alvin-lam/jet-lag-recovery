@@ -171,7 +171,7 @@ small { color: var(--muted); font-weight: 400; }
 }
 :root { --font-display: 'Instrument Serif', 'Iowan Old Style', Georgia, 'Times New Roman', serif; }
 
-.site-header { padding: 18px 16px 6px; position: relative; z-index: 2; }
+.site-header { padding: 18px 16px 6px; position: relative; z-index: 7; } /* above the page so the Appearance panel opens on top */
 .header-inner {
   max-width: 1200px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -569,14 +569,6 @@ details.more-options[open] > summary::before { transform: rotate(45deg); }
 details.more-options > summary small { font-weight: 500; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { details.more-options > summary::before { transition: none; } }
 
-/* Theme picker: tappable emoji icons grouped into rows. */
-.theme-picker { display: grid; gap: 10px; margin-top: 6px; }
-.theme-row { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.theme-row legend { padding: 0; margin-bottom: 4px; font-size: .8rem; opacity: .75; }
-.theme-icon { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(127,127,127,.35); cursor: pointer; font-size: 1.35rem; }
-.theme-icon input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-.theme-icon:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-.theme-icon:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Travel Tools: links to other All Trips Considered tools.
    Wider screens: a row of buttons (name, then icon).
@@ -610,3 +602,44 @@ details.more-options > summary small { font-weight: 500; color: var(--muted); }
   .quick-links a[aria-current="page"] .ql-arrow { font-size: 0; }
   .quick-links a[aria-current="page"] .ql-arrow::after { content: "\2713"; font-size: 1rem; letter-spacing: 0; }
 }
+
+/* Appearance panel (from atc-pwa-template): a popover under the header button with Mode, Color and
+   Decorations. Swatch colors are set from js/data/themes.js. */
+.appearance-wrap { position: relative; }
+.appearance-panel {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 40;
+  width: 300px; max-width: calc(100vw - 32px); padding: 16px;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .18); text-align: left;
+}
+.appearance-panel[hidden] { display: none; }
+.appearance-title { font-size: 1rem; margin: 0 0 12px; }
+.appearance-group { border: 0; margin: 0; padding: 0; min-width: 0; }
+.appearance-group + .appearance-group { margin-top: 16px; padding-top: 14px; box-shadow: inset 0 1px 0 var(--border); }
+.appearance-group legend { float: left; width: 100%; padding: 0; margin-bottom: 8px; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.appearance-group legend + * { clear: both; }
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 10px; }
+.segmented label { position: relative; }
+.segmented input, .scheme-option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.segmented span { display: grid; place-items: center; min-height: 36px; border-radius: 7px; font-weight: 600; font-size: .9rem; color: var(--muted); cursor: pointer; }
+.segmented input:checked + span { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+.segmented input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+.mode-hint { margin: 8px 2px 0; font-size: .82rem; color: var(--muted); }
+.scheme-list { max-height: min(300px, 45vh); overflow-y: auto; margin: 0 -6px; padding: 0 6px; }
+.scheme-subhead { margin: 10px 8px 4px; font-size: .75rem; font-weight: 600; color: var(--muted); }
+.scheme-subhead:first-child { margin-top: 0; }
+.scheme-option { position: relative; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+.scheme-option:hover { background: var(--surface-2); }
+.scheme-option:has(input:focus-visible) { box-shadow: inset 0 0 0 2px var(--accent); }
+.scheme-option:has(input:checked) { background: var(--surface-2); }
+.scheme-flag { font-size: 1.15rem; line-height: 1; }
+.scheme-name { flex: 1; font-size: .95rem; }
+.scheme-option input:checked ~ .scheme-name { font-weight: 700; }
+.scheme-now { display: block; font-size: .8rem; font-weight: 400; color: var(--muted); }
+.scheme-check { width: 16px; color: var(--accent); font-weight: 700; visibility: hidden; }
+.scheme-option input:checked ~ .scheme-check { visibility: visible; }
+.scheme-swatch { display: flex; border-radius: 3px; overflow: hidden; box-shadow: 0 0 0 1px var(--border); }
+.scheme-swatch i { width: 13.5px; height: 14px; }
+.decor-option { display: flex; align-items: center; gap: 10px; min-height: 40px; font-size: .92rem; cursor: pointer; }
+.decor-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); flex: none; }

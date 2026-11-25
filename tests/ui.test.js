@@ -152,11 +152,13 @@ test('theme is automatic: season by default, holiday while one is on', async () 
   const ds = await xmas.page.evaluate(() => ({ ...document.documentElement.dataset }));
   assert.equal(ds.holiday, 'christmas');
   await xmas.page.click('#appearance-btn');
-  assert.match(await xmas.page.textContent('#theme-now'), /Christmas/);
+  assert.match(await xmas.page.textContent('#scheme-list .scheme-option:first-of-type .scheme-now'), /Now: Christmas/);
   // The menu separates seasons and holidays, and the choice sticks.
-  const groups = await xmas.page.$$eval('#theme-picker legend', (g) => g.map((x) => x.textContent));
-  assert.deepEqual(groups, ['Automatic', 'Seasons', 'Holidays']);
-  const pick = (v) => xmas.page.click(`#theme-picker input[value="${v}"]`);
+  const groups = await xmas.page.$$eval('#appearance-panel legend', (g) => g.map((x) => x.textContent));
+  assert.deepEqual(groups, ['Mode', 'Color', 'Decorations']);
+  const subheads = await xmas.page.$$eval('#scheme-list .scheme-subhead', (g) => g.map((x) => x.textContent));
+  assert.deepEqual(subheads, ['Seasons', 'Holidays']);
+  const pick = (v) => xmas.page.click(`#scheme-list label:has(input[value="${v}"])`);
   await pick('season:summer'); await settle(xmas.page);
   assert.deepEqual(await xmas.page.evaluate(() => ({ ...document.documentElement.dataset })), { season: 'summer' });
   await pick('holiday:pride'); await settle(xmas.page);
@@ -166,8 +168,8 @@ test('theme is automatic: season by default, holiday while one is on', async () 
   await pick('holiday:halloween'); await settle(xmas.page);
   await xmas.page.reload(); await xmas.page.waitForSelector('.day');
   assert.equal(await xmas.page.evaluate(() => document.documentElement.dataset.holiday), 'halloween', 'choice is saved');
-  assert.equal(await xmas.page.$eval('#theme-picker input:checked', (e) => e.value), 'holiday:halloween');
   await xmas.page.click('#appearance-btn');
+  assert.equal(await xmas.page.$eval('#scheme-list input:checked', (e) => e.value), 'holiday:halloween');
   await xmas.page.uncheck('input[name=decorations]'); await settle(xmas.page);
   assert.equal(await xmas.page.$eval('#decor-particles', (e) => e.children.length), 0);
   await xmas.ctx.close();

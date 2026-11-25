@@ -109,12 +109,32 @@
         </a>
       </h1>
       <div class="header-actions">
-        <button id="appearance-btn" class="btn btn-ghost round-btn" type="button" aria-haspopup="dialog"
-          aria-label="Appearance" title="Appearance">
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0 0 22 10.8C22 5.9 17.5 2 12 2Zm-5.5 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z"/>
-          </svg>
-        </button>
+        <div class="appearance-wrap">
+          <button id="appearance-btn" class="btn btn-ghost round-btn" type="button" aria-expanded="false"
+            aria-controls="appearance-panel" aria-label="Appearance" title="Appearance">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="currentColor" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></svg>
+          </button>
+          <div id="appearance-panel" class="appearance-panel" role="dialog" aria-labelledby="appearance-title" hidden>
+            <h2 id="appearance-title" class="appearance-title">Appearance</h2>
+            <fieldset class="appearance-group">
+              <legend>Mode</legend>
+              <div class="segmented">
+                <label><input type="radio" name="mode" value="system"><span>Auto</span></label>
+                <label><input type="radio" name="mode" value="light"><span>Light</span></label>
+                <label><input type="radio" name="mode" value="dark"><span>Dark</span></label>
+              </div>
+              <p id="mode-hint" class="mode-hint"></p>
+            </fieldset>
+            <fieldset class="appearance-group">
+              <legend>Color</legend>
+              <div id="scheme-list" class="scheme-list"></div>
+            </fieldset>
+            <fieldset class="appearance-group">
+              <legend>Decorations</legend>
+              <label class="decor-option"><input type="checkbox" name="decorations"><span>Show seasonal and holiday decorations</span></label>
+            </fieldset>
+          </div>
+        </div>
       </div>
     </div>
     <p class="tagline"><strong class="app-name">Jet Lag &amp; Recovery</strong>
@@ -509,32 +529,6 @@
         <button type="button" class="btn btn-ghost" id="ci-cancel">Cancel</button>
         <button type="submit" class="btn" value="save">Update my plan</button>
       </div>
-    </form>
-  </dialog>
-
-  <!-- ============ APPEARANCE ============ -->
-  <dialog id="appearance-dialog" class="sheet" aria-labelledby="appearance-h">
-    <form method="dialog" id="appearance-form">
-      <div class="dialog-head">
-        <h2 id="appearance-h">Appearance</h2>
-        <button type="submit" class="btn btn-ghost icon-btn" aria-label="Close">✕</button>
-      </div>
-
-      <div class="field">
-        <span id="mode-l">Color mode</span>
-        <div class="seg" role="radiogroup" aria-labelledby="mode-l">
-          <label><input type="radio" name="mode" value="system"><span>System</span></label>
-          <label><input type="radio" name="mode" value="light"><span>Light</span></label>
-          <label><input type="radio" name="mode" value="dark"><span>Dark</span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <span class="label">Theme</span>
-        <div id="theme-picker" class="theme-picker"></div>
-        <p class="hint">Showing now: <strong id="theme-now"></strong>. <span id="theme-where"></span></p>
-      </div>
-      <label class="check-row"><input type="checkbox" name="decorations"> Show seasonal and holiday decorations</label>
     </form>
   </dialog>
 

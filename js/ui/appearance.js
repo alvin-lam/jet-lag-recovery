@@ -1,13 +1,12 @@
-// Appearance: color mode and theme. The theme picker has Automatic (the season, switching to a holiday's
+// Appearance panel (matches atc-pwa-template): Mode, Color and Decorations. The Color list has Automatic (the season, switching to a holiday's
 // colors while one is on) plus two groups to pick from: Seasons and Holidays. Decorations follow the
 // theme: holidays get the full set (garland, falling decorations, corner accents) and seasons a lighter
 // touch, and one switch turns them off.
 import { $, $$ } from '../lib/util.js';
 import { deviceTimeZone } from '../lib/time.js';
-import { HOLIDAYS, SEASONS, themeLabel } from '../data/themes.js';
+import { HOLIDAYS, SEASONS } from '../data/themes.js';
 import { detectHoliday, detectSeason, hemisphereForTz } from '../core/calendar.js';
 import { store, setAppearance } from '../state.js';
-import { openDialog, closeDialog } from './dialog.js';
 
 const DARK_BAR = '#101826';
 const DECOR = {
@@ -41,15 +40,39 @@ export function currentTheme(choice = 'auto', now = Date.now()) {
   return { season, holiday, emoji: (holiday ? HOLIDAYS[holiday] : SEASONS[season]).emoji, decor: holiday ? DECOR.holiday : DECOR.season };
 }
 
-/** Theme picker: icon buttons (radio inputs) for Automatic, then a Seasons row and a Holidays row. */
-function buildThemePicker(box) {
-  const icon = (value, glyph, name) =>
-    `<label class="theme-icon" title="${name}"><input type="radio" name="theme" value="${value}" aria-label="${name}"><span aria-hidden="true">${glyph}</span></label>`;
-  const row = (label, items) => `<fieldset class="theme-row"><legend>${label}</legend>${items.join('')}</fieldset>`;
-  box.innerHTML =
-    row('Automatic', [icon('auto', '✨', 'Automatic (seasons and holidays)'), icon('season', '🗓️', 'Current season')]) +
-    row('Seasons', Object.entries(SEASONS).map(([k, t]) => icon('season:' + k, t.icon, t.name))) +
-    row('Holidays', Object.entries(HOLIDAYS).map(([k, t]) => icon('holiday:' + k, t.icon, t.name)));
+const el = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+};
+
+/** Color list (as in atc-pwa-template): one row per theme with icon, name, color swatch and check mark. */
+function renderSchemeList(list) {
+  const now = currentTheme('auto');
+  const nowTheme = now.holiday ? HOLIDAYS[now.holiday] : SEASONS[now.season];
+  const rows = [
+    ['auto', '✨', 'Automatic', nowTheme.stripe, 'Now: ' + nowTheme.name],
+    ['season', '🗓️', 'Current season', SEASONS[now.season].stripe, 'Now: ' + SEASONS[now.season].name],
+    'Seasons', ...Object.entries(SEASONS).map(([k, t]) => ['season:' + k, t.icon, t.name, t.stripe]),
+    'Holidays', ...Object.entries(HOLIDAYS).map(([k, t]) => ['holiday:' + k, t.icon, t.name, t.stripe]),
+  ];
+  list.textContent = '';
+  for (const r of rows) {
+    if (typeof r === 'string') { list.appendChild(el('p', 'scheme-subhead', r)); continue; }
+    const [value, icon, name, stripe, sub] = r;
+    const row = el('label', 'scheme-option');
+    const input = el('input');
+    input.type = 'radio'; input.name = 'theme'; input.value = value;
+    const flag = el('span', 'scheme-flag', icon); flag.setAttribute('aria-hidden', 'true');
+    const label = el('span', 'scheme-name', name);
+    if (sub) label.appendChild(el('small', 'scheme-now', sub));
+    const swatch = el('span', 'scheme-swatch'); swatch.setAttribute('aria-hidden', 'true');
+    for (const c of stripe) { const i = el('i'); i.style.background = c; swatch.appendChild(i); }
+    const check = el('span', 'scheme-check', '✓'); check.setAttribute('aria-hidden', 'true');
+    row.append(input, flag, label, swatch, check);
+    list.appendChild(row);
+  }
 }
 
 const garlandHtml = (emoji, count) =>
@@ -102,35 +125,62 @@ export function applyAppearance() {
   $('#decor-corners').innerHTML = show && decor.corners
     ? `<span class="tl">${emoji[0]}</span><span class="bl">${emoji[1 % emoji.length]}</span>` : '';
 
-  $('#theme-now').textContent = holiday ? themeLabel(HOLIDAYS[holiday]) : themeLabel(SEASONS[season]);
   updateThemeColor(a.mode);
 }
 
-export function setupAppearance() {
-  const form = $('#appearance-form');
-  const dlg = $('#appearance-dialog');
-  buildThemePicker($('#theme-picker'));
-  $('#theme-where').textContent = `Automatic uses ${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere seasons, from your device time zone.`;
+const MODE_HINT = {
+  light: 'Always light.',
+  dark: 'Always dark.',
+};
 
-  const writeForm = () => {
-    for (const r of $$('input[name="mode"]', form)) r.checked = r.value === store.appearance.mode;
-    form.elements.decorations.checked = store.appearance.decorations !== false;
-    for (const r of $$('input[name="theme"]', form)) r.checked = r.value === store.appearance.theme;
+export function setupAppearance() {
+  const button = $('#appearance-btn');
+  const panel = $('#appearance-panel');
+  const list = $('#scheme-list');
+  const where = `Seasons follow the ${hemisphere === 'south' ? 'Southern' : 'Northern'} Hemisphere, from your device time zone.`;
+
+  const sync = () => {
+    const a = store.appearance;
+    for (const r of $$('input[name="mode"]', panel)) r.checked = r.value === a.mode;
+    for (const r of $$('input[name="theme"]', panel)) r.checked = r.value === a.theme;
+    panel.querySelector('input[name="decorations"]').checked = a.decorations !== false;
+    $('#mode-hint').textContent = MODE_HINT[a.mode]
+      || `Follows your device, which is set to ${prefersDark.matches ? 'dark' : 'light'} right now.`;
+    list.title = where;
   };
 
-  form.addEventListener('input', (e) => {
+  panel.addEventListener('change', (e) => {
     const t = e.target;
     if (t.name === 'mode') setAppearance({ mode: t.value });
     else if (t.name === 'decorations') setAppearance({ decorations: t.checked });
     else if (t.name === 'theme') setAppearance({ theme: t.value });
     else return;
     applyAppearance();
+    sync();
   });
-  $('#appearance-btn').addEventListener('click', () => { writeForm(); openDialog(dlg); });
-  dlg.addEventListener('click', (e) => { if (e.target === dlg) closeDialog(dlg); }); // click on backdrop
-  prefersDark.addEventListener?.('change', () => updateThemeColor(store.appearance.mode));
+
+  const open = () => {
+    renderSchemeList(list); // refresh "Now:" in case the season or holiday changed
+    sync();
+    panel.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
+    panel.querySelector('input[name="mode"]:checked')?.focus();
+  };
+  const close = (returnFocus) => {
+    if (panel.hidden) return;
+    panel.hidden = true;
+    button.setAttribute('aria-expanded', 'false');
+    if (returnFocus) button.focus();
+  };
+  button.addEventListener('click', () => (panel.hidden ? open() : close(true)));
+  panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); close(true); } });
+  document.addEventListener('click', (e) => { if (!panel.hidden && !panel.parentNode.contains(e.target)) close(false); });
+  panel.addEventListener('focusout', (e) => { if (e.relatedTarget && !panel.parentNode.contains(e.relatedTarget)) close(false); });
+
+  prefersDark.addEventListener?.('change', () => { updateThemeColor(store.appearance.mode); sync(); });
   reducedMotion.addEventListener?.('change', applyAppearance);
 
-  writeForm();
+  renderSchemeList(list);
+  sync();
   applyAppearance();
 }

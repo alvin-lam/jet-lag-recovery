@@ -2,25 +2,25 @@
 // `icon` is shown after the name in menus. `emoji` is the set used for decorations.
 
 export const HOLIDAYS = {
-  newyear:      { name: "New Year's",            icon: '🎆', emoji: ['🎆', '🎉', '🥂', '✨', '🎊'] },
-  lunar:        { name: 'Lunar New Year',        icon: '🧧', emoji: ['🧧', '🏮', '🐉', '🎊', '🍊'] },
-  valentine:    { name: "Valentine's Day",       icon: '❤️', emoji: ['❤️', '💕', '🌹', '💌', '💖'] },
-  stpatrick:    { name: "St. Patrick's Day",     icon: '☘️', emoji: ['☘️', '🍀', '🌈', '💚'] },
-  easter:       { name: 'Easter',                icon: '🐣', emoji: ['🐣', '🥚', '🌷', '🐰', '🌼'] },
-  pride:        { name: 'Pride Month',           icon: '🏳️‍🌈', emoji: ['🏳️‍🌈', '🌈', '❤️', '🧡', '💛', '💚', '💙', '💜'] },
-  independence: { name: 'Independence Day (US)', icon: '🇺🇸', emoji: ['🎆', '🇺🇸', '✨', '🎇', '⭐'] },
-  halloween:    { name: 'Halloween',             icon: '🎃', emoji: ['🎃', '👻', '🦇', '🕸️', '🍬'] },
-  diwali:       { name: 'Diwali',                icon: '🪔', emoji: ['🪔', '✨', '🎇', '🌺', '🪷'] },
-  thanksgiving: { name: 'Thanksgiving (US)',     icon: '🦃', emoji: ['🦃', '🍂', '🥧', '🌽', '🍁'] },
-  hanukkah:     { name: 'Hanukkah',              icon: '🕎', emoji: ['🕎', '✨', '🔵', '⭐', '🍩'] },
-  christmas:    { name: 'Christmas',             icon: '🎄', emoji: ['🎄', '🎁', '❄️', '⭐', '🔔'] },
+  newyear:      { name: "New Year's",            icon: '🎆', stripe: ['#3b3f8f', '#c9a227'], emoji: ['🎆', '🎉', '🥂', '✨', '🎊'] },
+  lunar:        { name: 'Lunar New Year',        icon: '🧧', stripe: ['#b3261e', '#c99a1d'], emoji: ['🧧', '🏮', '🐉', '🎊', '🍊'] },
+  valentine:    { name: "Valentine's Day",       icon: '❤️', stripe: ['#b02a5b', '#e46f96'], emoji: ['❤️', '💕', '🌹', '💌', '💖'] },
+  stpatrick:    { name: "St. Patrick's Day",     icon: '☘️', stripe: ['#1f7a3a', '#c9a227'], emoji: ['☘️', '🍀', '🌈', '💚'] },
+  easter:       { name: 'Easter',                icon: '🐣', stripe: ['#6c4fb0', '#e88fb3'], emoji: ['🐣', '🥚', '🌷', '🐰', '🌼'] },
+  pride:        { name: 'Pride Month',           icon: '🏳️‍🌈', stripe: ['#6a2c91', '#e8590c'], emoji: ['🏳️‍🌈', '🌈', '❤️', '🧡', '💛', '💚', '💙', '💜'] },
+  independence: { name: 'Independence Day (US)', icon: '🇺🇸', stripe: ['#1f3f8a', '#c0262d'], emoji: ['🎆', '🇺🇸', '✨', '🎇', '⭐'] },
+  halloween:    { name: 'Halloween',             icon: '🎃', stripe: ['#c2510f', '#5b2a86'], emoji: ['🎃', '👻', '🦇', '🕸️', '🍬'] },
+  diwali:       { name: 'Diwali',                icon: '🪔', stripe: ['#b4500d', '#c9128a'], emoji: ['🪔', '✨', '🎇', '🌺', '🪷'] },
+  thanksgiving: { name: 'Thanksgiving (US)',     icon: '🦃', stripe: ['#8c3b12', '#c98a12'], emoji: ['🦃', '🍂', '🥧', '🌽', '🍁'] },
+  hanukkah:     { name: 'Hanukkah',              icon: '🕎', stripe: ['#1d4fa0', '#8aa4c8'], emoji: ['🕎', '✨', '🔵', '⭐', '🍩'] },
+  christmas:    { name: 'Christmas',             icon: '🎄', stripe: ['#a3202a', '#1f6e3d'], emoji: ['🎄', '🎁', '❄️', '⭐', '🔔'] },
 };
 
 export const SEASONS = {
-  spring: { name: 'Spring', icon: '🌸', emoji: ['🌸', '🌷', '🦋', '🌱', '🌼'] },
-  summer: { name: 'Summer', icon: '☀️', emoji: ['☀️', '🌴', '🌊', '🍉', '🕶️'] },
-  autumn: { name: 'Autumn', icon: '🍂', emoji: ['🍁', '🍂', '🍃', '🌰', '🍄'] },
-  winter: { name: 'Winter', icon: '❄️', emoji: ['❄️', '⛄', '🌨️', '🧣', '❄️'] },
+  spring: { name: 'Spring', icon: '🌸', stripe: ['#3d7d4a', '#d96a8f'], emoji: ['🌸', '🌷', '🦋', '🌱', '🌼'] },
+  summer: { name: 'Summer', icon: '☀️', stripe: ['#0b7285', '#f08c00'], emoji: ['☀️', '🌴', '🌊', '🍉', '🕶️'] },
+  autumn: { name: 'Autumn', icon: '🍂', stripe: ['#9a4a1c', '#c98a12'], emoji: ['🍁', '🍂', '🍃', '🌰', '🍄'] },
+  winter: { name: 'Winter', icon: '❄️', stripe: ['#2f5d8a', '#6fa8d6'], emoji: ['❄️', '⛄', '🌨️', '🧣', '❄️'] },
 };
 
 /** "Christmas 🎄" style label used in menus and hints. */
