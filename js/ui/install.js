@@ -4,14 +4,13 @@
 //     Share, then Add to Home Screen, so we remind them how.
 //   - Android browsers without the prompt (such as Firefox) install from their menu.
 //   - Desktop browsers without the prompt (Safari on a Mac, Firefox) get no reminder or icon.
-// The reminder banner appears once, and again only after NAG_DAYS if dismissed. The header
-// download icon stays available whenever installing is possible.
+// The reminder banner is the only install entry point. Closing it hides it for 24 hours.
 import { $ } from '../lib/util.js';
 import { load, save } from '../lib/storage.js';
 import { STORAGE_KEYS } from '../config.js';
 import { openDialog, closeDialog } from './dialog.js';
 
-const NAG_DAYS = 14;
+const SNOOZE_MS = 24 * 60 * 60 * 1000; // closing the banner hides it for a day
 const PROMPT_WAIT_MS = 4000; // give Chromium time to fire beforeinstallprompt before falling back
 
 const SHARE_ICON = '<svg class="inline-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
@@ -52,17 +51,15 @@ const isInstalled = () => window.matchMedia('(display-mode: standalone)').matche
   || navigator.standalone === true;
 
 export function setupInstall() {
-  const btn = $('#install-btn');
   const banner = $('#install-banner');
   const dlg = $('#install-dialog');
   const platform = detectPlatform();
   let deferred = null; // the browser's install prompt, when it offers one
   let mode = null;     // 'prompt' or a key of MANUAL
 
-  const dismissedRecently = () => Date.now() - load(STORAGE_KEYS.installNag, 0) < NAG_DAYS * 86400000;
+  const dismissedRecently = () => Date.now() - load(STORAGE_KEYS.installNag, 0) < SNOOZE_MS;
 
   function hideAll() {
-    btn.hidden = true;
     banner.hidden = true;
     document.body.classList.remove('has-install-banner');
   }
@@ -86,7 +83,6 @@ export function setupInstall() {
   function offer(newMode) {
     if (isInstalled()) return;
     mode = newMode;
-    btn.hidden = false;
     showBanner();
   }
 
@@ -115,7 +111,6 @@ export function setupInstall() {
   });
   window.addEventListener('appinstalled', hideAll);
 
-  btn.addEventListener('click', install);
   $('#install-banner-action').addEventListener('click', install);
   $('#install-banner-close').addEventListener('click', () => {
     save(STORAGE_KEYS.installNag, Date.now());

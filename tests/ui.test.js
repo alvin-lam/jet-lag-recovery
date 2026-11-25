@@ -123,15 +123,23 @@ test('device defaults: clock, units and dates', async () => {
   await uk.ctx.close();
 });
 
-test('install reminder only where installing is possible', async () => {
+test('install banner only where possible; closing hides it for 24 hours', async () => {
   const visible = async (context) => {
     const ctx = await browser.newContext(context);
     await ctx.addInitScript(() => localStorage.setItem('atc-disclaimer', '1'));
     const page = await ctx.newPage(); await page.goto(server.url); await page.waitForSelector('.day'); await page.waitForTimeout(300);
-    const r = { banner: await page.isVisible('#install-banner'), icon: await page.isVisible('#install-btn') };
+    const r = { banner: await page.isVisible('#install-banner'), icon: await page.$('#install-btn') !== null };
+    if (r.banner) {
+      await page.click('#install-banner-close');
+      await page.reload(); await page.waitForSelector('.day'); await page.waitForTimeout(300);
+      r.closed = await page.isVisible('#install-banner');
+      await page.evaluate(() => localStorage.setItem('atc-install-dismissed', JSON.stringify(Date.now() - 25 * 3600000)));
+      await page.reload(); await page.waitForSelector('.day'); await page.waitForTimeout(300);
+      r.back = await page.isVisible('#install-banner');
+    }
     await ctx.close(); return r;
   };
-  assert.deepEqual(await visible({ userAgent: IPHONE, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }), { banner: true, icon: true });
+  assert.deepEqual(await visible({ userAgent: IPHONE, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }), { banner: true, icon: false, closed: false, back: true });
   assert.deepEqual(await visible({ userAgent: MAC_SAFARI, viewport: { width: 1280, height: 900 } }), { banner: false, icon: false });
   assert.deepEqual(await visible({ viewport: { width: 1280, height: 900 } }), { banner: false, icon: false });
 });
