@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <!-- Security: only this site's own scripts, styles, fonts and images may load. Keep in sync with the
+       Cloudflare response headers. Trusted Types is left off because the views build HTML with innerHTML. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Jet Lag &amp; Recovery | All Trips Considered</title>
   <meta name="description" content="Beat jet lag with a free, personalized plan for sleep, light, caffeine, and hydration. Search 3,100 airports, plan your return flight, and use it offline on any device.">
@@ -89,13 +93,7 @@
   <meta name="application-name" content="Jet Lag &amp; Recovery">
   <link rel="preload" href="assets/fonts/instrument-serif-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/styles.css">
-  <script>
-    // Apply saved appearance before first paint to avoid a theme flash.
-    try {
-      var a = JSON.parse(localStorage.getItem('atc-appearance') || '{}');
-      if (a.mode === 'light' || a.mode === 'dark') document.documentElement.dataset.theme = a.mode;
-    } catch (e) {}
-  </script>
+  <script src="js/boot.js"></script>
 </head>
 <body>
   <div id="decor-garland" class="decor-garland" aria-hidden="true"></div>

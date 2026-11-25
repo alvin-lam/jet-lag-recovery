@@ -1,11 +1,12 @@
 /* Jet Lag & Recovery service worker: offline-first app shell. */
 // Bump the version whenever any cached file changes so clients pick up the update.
-const CACHE = 'atc-v46';
+const CACHE = 'atc-v47';
 const ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './manifest.webmanifest',
+  './js/boot.js',
   './js/config.js',
   './js/core/calendar.js',
   './js/core/model.js',

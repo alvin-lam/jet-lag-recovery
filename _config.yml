@@ -1,0 +1,10 @@
+# GitHub Pages builds this site with Jekyll. These files are for development only,
+# so leave them out of the published site.
+exclude:
+  - tests/
+  - tools/
+  - node_modules/
+  - package.json
+  - package-lock.json
+  - README.md
+  - .github/

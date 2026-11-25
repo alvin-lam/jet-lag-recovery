@@ -66,7 +66,7 @@ function particlesHtml(emoji, count, animate) {
       `animation-delay:${-((i * 71) % 24)}s`,
       `--drift:${(i % 2 ? 1 : -1) * (20 + ((i * 13) % 60))}px`,
     ].filter(Boolean).join(';');
-    return `<span style="${style}">${emoji[i % emoji.length]}</span>`;
+    return `<span data-style="${style}">${emoji[i % emoji.length]}</span>`;
   }).join('');
 }
 

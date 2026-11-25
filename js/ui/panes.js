@@ -52,7 +52,7 @@ export function renderWater(p) {
 
   $('#pane-water').innerHTML = `<div class="info-grid">
     ${card('💧 Daily target', `<p class="big-num">${fmtVol(w.base)}</p>
-      <div class="water-bar" aria-hidden="true"><i style="width:${clamp((w.base / 5000) * 100, 5, 100)}%"></i></div>
+      <div class="water-bar" aria-hidden="true"><i data-style="width:${clamp((w.base / 5000) * 100, 5, 100)}%"></i></div>
       <p>About <strong>${w.glasses} glasses</strong> of ${fmtVolShort(MODEL.glassMl)} each, from all drinks and water-rich foods.</p>
       <p class="hint">${basis} People with heart or kidney conditions, or on fluid limits, should follow their doctor's guidance instead.</p>`)}
     ${card('⏰ Suggested times on a full day', `<p>${w.times.slice(0, 12).map(fmtTime).join(', ')}</p>

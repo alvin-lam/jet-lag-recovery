@@ -230,3 +230,21 @@ test('update banner offers a refresh', async () => {
   assert.deepEqual(errors, []);
   await ctx.close();
 });
+
+test('security policy: nothing is blocked and styles still apply', async () => {
+  const { page, ctx, errors } = await openApp(browser, server.url, { trip: NY_LONDON, now: '2026-12-20T15:00:00Z' });
+  await page.addInitScript(() => {
+    window.__csp = [];
+    document.addEventListener('securitypolicyviolation', (e) => window.__csp.push(e.violatedDirective + ' ' + e.blockedURI));
+  });
+  await page.reload(); await page.waitForSelector('.day');
+  assert.match(await page.$eval('meta[http-equiv="Content-Security-Policy"]', (m) => m.content), /script-src 'self'; style-src 'self'/);
+  for (const tab of ['plan', 'flight', 'water', 'recovery']) { await page.click('#tab-' + tab); await settle(page); }
+  await page.click('#tab-plan');
+  assert.deepEqual(await page.evaluate(() => window.__csp), []);
+  assert.equal(await page.$$eval('[data-style]', (e) => e.length), 0, 'every data-style was applied');
+  assert.notEqual(await page.$eval('#decor-particles span', (e) => e.style.left), '');
+  assert.notEqual(await page.$eval('.seg-bar', (e) => e.style.width), '');
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});

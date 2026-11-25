@@ -7,11 +7,11 @@ const pct = (h) => (h / 24) * 100;
 
 export function bar(cls, a, b, title) {
   return toDayPieces(a, b).map(([s, e]) =>
-    `<span class="seg-bar ${cls}" style="left:${pct(s)}%;width:${pct(e - s)}%" title="${esc(title)}"></span>`).join('');
+    `<span class="seg-bar ${cls}" data-style="left:${pct(s)}%;width:${pct(e - s)}%" title="${esc(title)}"></span>`).join('');
 }
 
 export function marker(cls, h, title) {
-  return `<span class="marker ${cls}" style="left:${pct(mod24(h))}%" title="${esc(title)}"></span>`;
+  return `<span class="marker ${cls}" data-style="left:${pct(mod24(h))}%" title="${esc(title)}"></span>`;
 }
 
 /** Seek and avoid light bars for a { seek, avoid } pair of windows. */
@@ -24,7 +24,7 @@ export function lightBars(light) {
 function axis() {
   const end = uses24h() ? '24:00' : '12 am';
   return '<div class="axis">' + [0, 6, 12, 18, 24].map((t) =>
-    `<span style="left:${pct(t)}%">${t === 24 ? end : fmtTime(t)}</span>`).join('') + '</div>';
+    `<span data-style="left:${pct(t)}%">${t === 24 ? end : fmtTime(t)}</span>`).join('') + '</div>';
 }
 
 /** Three lanes: sleep, light, caffeine and water. The text tips carry the same information for screen readers. */
