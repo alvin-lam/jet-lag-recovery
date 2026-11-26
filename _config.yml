@@ -8,3 +8,4 @@ exclude:
   - package-lock.json
   - README.md
   - .github/
+  - design/
