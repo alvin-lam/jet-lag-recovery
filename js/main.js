@@ -12,7 +12,7 @@ import { renderFlight, renderWater, renderRecovery } from './ui/panes.js';
 import { setupTabs, setTabVisible } from './ui/tabs.js';
 import { fmtDate, fmtTime } from './ui/format.js';
 import { setupCheckin } from './ui/checkin.js';
-import { exportIcs } from './ui/ics.js';
+import { setupCalendarMenu } from './ui/calendar-menu.js';
 import { setupAppearance } from './ui/appearance.js';
 import { setupTravelTools } from './ui/travel-tools.js';
 import { setupLegal } from './ui/legal.js';
@@ -101,9 +101,7 @@ function init() {
     writeForm();
     render();
   });
-  const exportBoth = () => plan && exportIcs(plan, back);
-  $('#ics-btn').addEventListener('click', exportBoth);
-  $('#ret-ics-btn').addEventListener('click', exportBoth);
+  setupCalendarMenu(() => ({ plan, back }));
 
   setupCheckin({ getPlan: (leg) => (leg === 'return' ? back : plan), onChange: render });
   setupTabs();

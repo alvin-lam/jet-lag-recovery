@@ -646,3 +646,20 @@ details.more-options > summary small { font-weight: 500; color: var(--muted); }
 
 /* App icon above the copyright, as in the other All Trips Considered apps. */
 .footer-icon { display: block; width: 75px; height: 75px; margin: 24px auto 1.5em; }
+
+/* Add to Calendar dialog */
+.cal-options { display: grid; gap: 8px; margin-top: 10px; }
+.cal-option { display: flex; align-items: center; gap: 12px; justify-content: flex-start; text-align: left; min-height: 56px; width: 100%;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.cal-option:hover { border-color: var(--accent); background: var(--surface-2); }
+.cal-option > span:first-child { font-size: 1.4rem; }
+.cal-option strong { display: block; }
+.cal-option small { display: block; font-weight: 400; color: var(--muted); font-size: .82rem; }
+.cal-google-list { list-style: none; margin: 10px 0; padding: 0; display: grid; gap: 6px; max-height: min(360px, 50vh); overflow-y: auto; }
+.cal-google-link { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; align-items: center; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+.cal-google-link span { font-weight: 600; }
+.cal-google-link small { grid-column: 1; color: var(--muted); }
+.cal-google-link b { grid-column: 2; grid-row: 1 / span 2; color: var(--accent); }
+.cal-google-link.added b::before { content: "✓ "; }
+.cal-google-link:hover { border-color: var(--accent); }

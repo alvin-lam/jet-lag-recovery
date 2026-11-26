@@ -391,7 +391,7 @@
         </div>
         <div id="days"></div>
         <div class="pane-actions">
-          <button type="button" id="ics-btn" class="btn">Add sleep times to calendar (.ics)</button>
+          <button type="button" id="ics-btn" class="btn">Add to Calendar</button>
         </div>
       </div>
       <div id="pane-flight" role="tabpanel" aria-labelledby="tab-flight" class="pane" hidden></div>
@@ -403,7 +403,7 @@
         <div id="ret-summary" class="panel summary"></div>
         <div id="ret-days"></div>
         <div class="pane-actions">
-          <button type="button" id="ret-ics-btn" class="btn">Add sleep times to calendar (.ics)</button>
+          <button type="button" id="ret-ics-btn" class="btn">Add to Calendar</button>
         </div>
       </div>
 
@@ -465,6 +465,26 @@
       <button type="button" id="update-later" class="btn btn-ghost btn-sm">Later</button>
     </div>
   </div>
+
+  <dialog id="cal-dialog" class="sheet" aria-labelledby="cal-h">
+    <div class="dialog-head">
+      <h2 id="cal-h">Add to Calendar</h2>
+      <button type="button" class="btn btn-ghost icon-btn" id="cal-close" aria-label="Close">✕</button>
+    </div>
+    <div id="cal-choose">
+      <p class="hint">Adds each planned night of sleep, with an alert 15 minutes before bedtime.</p>
+      <div class="cal-options">
+        <button type="button" class="btn cal-option" data-cal="apple"><span aria-hidden="true">📅</span><span><strong>Apple Calendar</strong><small>iPhone, iPad and Mac</small></span></button>
+        <button type="button" class="btn cal-option" data-cal="google"><span aria-hidden="true">🗓️</span><span><strong>Google Calendar</strong><small>Add each night with one tap</small></span></button>
+        <button type="button" class="btn cal-option" data-cal="other"><span aria-hidden="true">⬇️</span><span><strong>Other (.ics)</strong><small>Outlook and other calendar apps</small></span></button>
+      </div>
+    </div>
+    <div id="cal-google" hidden>
+      <p class="hint">Tap each night to open it in Google Calendar, then save. Google uses your own default reminder, so set it to 15 minutes if you like.</p>
+      <ul id="cal-google-list" class="cal-google-list"></ul>
+      <div class="dialog-actions"><button type="button" class="btn btn-ghost" id="cal-back">Back</button></div>
+    </div>
+  </dialog>
 
   <dialog id="install-dialog" class="sheet" aria-labelledby="install-h">
     <h2 id="install-h">Add to Home Screen</h2>

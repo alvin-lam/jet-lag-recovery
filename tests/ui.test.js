@@ -94,10 +94,23 @@ test('return trip: plan, sleep logs and calendar export', async () => {
   await page.click('#checkin-form button[type=submit]'); await settle(page);
   assert.notEqual(await sync(), before, 'a return sleep log adapts the return plan');
   assert.equal((await page.$$('#days .logged')).length, 0, 'outbound logs are separate');
-  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#ret-ics-btn')]);
+  assert.equal((await page.textContent('#ret-ics-btn')).trim(), 'Add to Calendar');
+  await page.click('#ret-ics-btn');
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-cal="other"]')]);
   const ics = await readFile(await dl.path(), 'utf8');
   assert.ok((ics.match(/SUMMARY:Sleep \(back home/g) || []).length >= 1);
   assert.ok(ics.includes('Not medical or health advice'));
+  const events = (ics.match(/BEGIN:VEVENT/g) || []).length;
+  assert.equal((ics.match(/TRIGGER:-PT15M/g) || []).length, events, 'every night has a 15-minute alert');
+  // Google Calendar: one link per night, with the event filled in.
+  await page.click('#ret-ics-btn'); await page.click('[data-cal="google"]');
+  const links = await page.$$eval('#cal-google-list a', (a) => a.map((x) => x.href));
+  assert.equal(links.length, events);
+  const u = new URL(links[0]);
+  assert.equal(u.hostname, 'calendar.google.com');
+  assert.equal(u.searchParams.get('action'), 'TEMPLATE');
+  assert.match(u.searchParams.get('dates'), /^\d{8}T\d{6}Z\/\d{8}T\d{6}Z$/);
+  await page.click('#cal-close');
   // Closing the section turns the return off; reopening keeps the details.
   const date = await page.inputValue('#retDate');
   await page.click('#ret-section summary'); await settle(page);

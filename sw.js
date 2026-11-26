@@ -1,6 +1,6 @@
 /* Jet Lag & Recovery service worker: offline-first app shell. */
 // Bump the version whenever any cached file changes so clients pick up the update.
-const CACHE = 'atc-v51';
+const CACHE = 'atc-v52';
 const ASSETS = [
   './',
   './index.html',
@@ -23,6 +23,7 @@ const ASSETS = [
   './js/pwa.js',
   './js/state.js',
   './js/ui/appearance.js',
+  './js/ui/calendar-menu.js',
   './js/ui/checkin.js',
   './js/ui/dialog.js',
   './js/ui/form.js',
