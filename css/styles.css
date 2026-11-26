@@ -663,3 +663,5 @@ details.more-options > summary small { font-weight: 500; color: var(--muted); }
 .cal-google-link b { grid-column: 2; grid-row: 1 / span 2; color: var(--accent); }
 .cal-google-link.added b::before { content: "✓ "; }
 .cal-google-link:hover { border-color: var(--accent); }
+.share-status:empty { display: none; }
+.share-status { margin-top: 10px; color: var(--text); }

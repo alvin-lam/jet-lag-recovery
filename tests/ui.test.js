@@ -263,3 +263,26 @@ test('security policy: nothing is blocked and styles still apply', async () => {
   assert.deepEqual(errors, []);
   await ctx.close();
 });
+
+test('Share to: plain text, copy and graphs image', async () => {
+  const { page, ctx, errors } = await openApp(browser, server.url, { trip: NY_LONDON,
+    context: { acceptDownloads: true, permissions: ['clipboard-read', 'clipboard-write'] } });
+  assert.equal((await page.textContent('#share-btn')).trim(), 'Share to…');
+  // Copy text puts the whole plan on the clipboard; the plain text email uses the same text.
+  await page.click('#share-btn');
+  await page.click('[data-share="copy"]');
+  await page.waitForFunction(() => document.querySelector('#share-status').textContent.startsWith('Copied'));
+  const text = await page.evaluate(() => navigator.clipboard.readText());
+  assert.match(text, /^Jet Lag & Recovery plan: New York → London/);
+  assert.match(text, /Wake .+, bed /);
+  assert.match(text, /Last caffeine/);
+  assert.match(text, /Not medical or health advice/);
+  // Graphs: headless Chromium has no share sheet, so the image is saved instead.
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-share="graphs"]')]);
+  assert.equal(dl.suggestedFilename(), 'jet-lag-plan-london.png');
+  const png = await readFile(await dl.path());
+  assert.equal(png.subarray(1, 4).toString(), 'PNG');
+  assert.ok(png.length > 10000, 'image has content');
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});

@@ -392,6 +392,7 @@
         <div id="days"></div>
         <div class="pane-actions">
           <button type="button" id="ics-btn" class="btn">Add to Calendar</button>
+          <button type="button" id="share-btn" class="btn btn-ghost">Share to…</button>
         </div>
       </div>
       <div id="pane-flight" role="tabpanel" aria-labelledby="tab-flight" class="pane" hidden></div>
@@ -404,6 +405,7 @@
         <div id="ret-days"></div>
         <div class="pane-actions">
           <button type="button" id="ret-ics-btn" class="btn">Add to Calendar</button>
+          <button type="button" id="ret-share-btn" class="btn btn-ghost">Share to…</button>
         </div>
       </div>
 
@@ -465,6 +467,20 @@
       <button type="button" id="update-later" class="btn btn-ghost btn-sm">Later</button>
     </div>
   </div>
+
+  <dialog id="share-dialog" class="sheet" aria-labelledby="share-h">
+    <div class="dialog-head">
+      <h2 id="share-h">Share to…</h2>
+      <button type="button" class="btn btn-ghost icon-btn" id="share-close" aria-label="Close">✕</button>
+    </div>
+    <p class="hint">Send your plan to yourself or a travel companion.</p>
+    <div class="cal-options">
+      <button type="button" class="btn cal-option" data-share="graphs"><span aria-hidden="true">📊</span><span><strong>Email with graphs</strong><small>The plan as text, with the daily graphs as an image</small></span></button>
+      <button type="button" class="btn cal-option" data-share="text"><span aria-hidden="true">✉️</span><span><strong>Email as plain text</strong><small>Opens your email app with the plan written out</small></span></button>
+      <button type="button" class="btn cal-option" data-share="copy"><span aria-hidden="true">📋</span><span><strong>Copy text</strong><small>Paste into any email or message</small></span></button>
+    </div>
+    <p id="share-status" class="hint share-status" role="status"></p>
+  </dialog>
 
   <dialog id="cal-dialog" class="sheet" aria-labelledby="cal-h">
     <div class="dialog-head">

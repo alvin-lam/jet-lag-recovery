@@ -13,6 +13,7 @@ import { setupTabs, setTabVisible } from './ui/tabs.js';
 import { fmtDate, fmtTime } from './ui/format.js';
 import { setupCheckin } from './ui/checkin.js';
 import { setupCalendarMenu } from './ui/calendar-menu.js';
+import { setupShare } from './ui/share.js';
 import { setupAppearance } from './ui/appearance.js';
 import { setupTravelTools } from './ui/travel-tools.js';
 import { setupLegal } from './ui/legal.js';
@@ -102,6 +103,7 @@ function init() {
     render();
   });
   setupCalendarMenu(() => ({ plan, back }));
+  setupShare(() => ({ plan, back }));
 
   setupCheckin({ getPlan: (leg) => (leg === 'return' ? back : plan), onChange: render });
   setupTabs();

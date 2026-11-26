@@ -18,6 +18,7 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 - **Hydration estimates:** a standard daily water estimate for adults, adjusted for alcohol, plus in-flight intake. Body weight, activity, and destination climate are optional, under a collapsed "Personalize my water target" section, and refine the target only when filled in. Metric or imperial.
 - **Recovery methods:** light, movement, meals, naps, and sleep setting tips tailored to your direction of travel.
 - **Add to Calendar:** choose **Apple Calendar** (iPhone, iPad and Mac), **Google Calendar** (one link per night that opens Google Calendar with the event filled in, shown in local time at the destination) or **Other (.ics)** for Outlook and other apps. Apple Calendar and Other use an `.ics` file in which every night has an alert 15 minutes before bedtime; Google Calendar links use the person's own default reminder.
+- **Share to…:** next to Add to Calendar. **Email with graphs** sends the plan as text plus an image of the daily graphs through the device share sheet (Mail, Gmail, Outlook); where a browser cannot share files, it saves the image and opens an email to attach it to. **Email as plain text** opens the email app with the plan written out, and **Copy text** puts it on the clipboard. Every version ends with the not-advice note and a link to the app.
 - **Device defaults:** the clock (12- or 24-hour), water units, and body weight unit follow the device's region settings, for example 12-hour, ounces, and pounds in the US, and 24-hour, liters, and kilograms in most other places. Dates use the region's date order in English ("Wed, Dec 2" in the US, "Tue 1 Dec" in the UK). The Clock and Water units menus offer "Device setting" plus fixed choices, and Reset returns to the device defaults.
 - **Short setup:** flight, return flight, and normal sleep are up front. Caffeine, water, plan style, clock, and units sit in a collapsed "More options."
 - **Appearance panel** (half-filled circle in the header, matching atc-pwa-template): **Mode** (Auto, Light, Dark), **Color**, and **Decorations**. In Color, **Automatic** is the default: colors follow the season and switch to a holiday's colors while it is on. Travelers can pick instead from **Current season**, **Seasons** (Spring 🌸, Summer ☀️, Autumn 🍂, Winter ❄️) or **Holidays** (any one holiday, such as Christmas 🎄 or Pride Month 🏳️‍🌈). Each row shows a color swatch. A checkbox turns seasonal and holiday decorations on or off. Automatic seasons use the hemisphere of the device time zone, and US-only holidays appear automatically only in US time zones.
@@ -85,7 +86,7 @@ js/
     to-top.js            Back to top button
     location-picker.js   Search box (combobox) for departure and arrival
     install.js           Install button, Add to Home Screen reminder and steps
-    tabs.js, dialog.js, ics.js
+    tabs.js, dialog.js, ics.js, calendar-menu.js, share.js
 ```
 
 ### Data design
