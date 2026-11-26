@@ -1,7 +1,7 @@
 {
   "name": "Jet Lag & Recovery",
   "short_name": "Jet Lag",
-  "description": "Jet Lag & Recovery by All Trips Considered: plan sleep, caffeine, light, and hydration to recover from jet lag faster.",
+  "description": "A free, personalized plan for sleep, light, caffeine, and hydration to help you recover from jet lag faster, there and back. Works offline.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -31,5 +31,14 @@
       "purpose": "maskable"
     }
   ],
-  "id": "./"
+  "id": "./",
+  "screenshots": [
+    {
+      "src": "assets/og-image.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Jet Lag & Recovery by All Trips Considered"
+    }
+  ]
 }
