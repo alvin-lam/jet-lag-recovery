@@ -32,6 +32,8 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 - A "Not health advice" notice sits above every plan.
 - The Flight, Hydration, and Recovery tabs each end with a not-advice reminder.
 - The footer states the app is not health advice, is provided as is, and links to the full disclaimer and limitation of liability.
+- **Footer:** the app icon sits centered above the copyright line, which links to All Trips Considered. Below it, **Travel Tools** links to the other All Trips Considered apps (the same section as the Schengen 90/180 app): a row of buttons on wider screens and a list on phones, with "You are here" on the app being viewed.
+- **Security:** a strict Content-Security-Policy lets only this site's own scripts, styles, fonts, and images load. There is no inline script or inline style markup, and development files (tests, tools, design) are left off the published site.
 - Exported calendar events carry a not-advice note.
 
 ## Project structure
