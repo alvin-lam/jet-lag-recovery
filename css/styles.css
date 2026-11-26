@@ -643,3 +643,6 @@ details.more-options > summary small { font-weight: 500; color: var(--muted); }
 .scheme-swatch i { width: 13.5px; height: 14px; }
 .decor-option { display: flex; align-items: center; gap: 10px; min-height: 40px; font-size: .92rem; cursor: pointer; }
 .decor-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); flex: none; }
+
+/* App icon above the copyright, as in the other All Trips Considered apps. */
+.footer-icon { display: block; width: 75px; height: 75px; margin: 24px auto 1.5em; }
