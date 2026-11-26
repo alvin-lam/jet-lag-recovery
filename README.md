@@ -1,10 +1,10 @@
 # Jet Lag & Recovery
 
-<img src="docs/assets/img/icon-512.png" alt="Jet Lag &amp; Recovery app icon: a traveler asleep in bed under a globe, with a plane circling and a clock turning back" width="160" height="160">
-
 Jet Lag & Recovery is a progressive web app (PWA) by All Trips Considered that helps frequent flyers recover from jet lag. Enter your flight and normal sleep pattern, and it builds a day-by-day plan for sleep, light, caffeine, and hydration.
 
 Live site: https://jetlag.alltripsconsidered.com/
+
+![Jet Lag & Recovery link preview](docs/assets/img/og-image.jpg)
 
 ## Features
 
@@ -177,11 +177,7 @@ For search engines, `docs/robots.txt` points to `docs/sitemap.xml`. Update `<las
 
 Open work, in rough priority order. Check items off as they ship.
 
-### 1. Launch checks
-
-- [ ] **Verify the live site and HTTPS.** In GitHub Pages settings, confirm the custom domain is verified and "Enforce HTTPS" is on.
-
-### 2. Features for frequent flyers
+### 1. Features for frequent flyers
 
 - [ ] **Return trips and connections.** Return planning is in Preview, with sleep logs and calendar export for both legs. Still to do: multi-leg trips with layovers.
 - [ ] **Saved trips.** Keep several trips and switch between them.
@@ -189,7 +185,7 @@ Open work, in rough priority order. Check items off as they ship.
 - [ ] **Share a plan.** Send a travel companion a link that opens the same trip.
 - [ ] **Flight lookup.** Fill in cities, times, and flight length from a flight number such as BA 178. This needs a flight data service (usually paid) and a small server to keep its key private.
 
-### 3. Trust and polish
+### 2. Trust and polish
 
 - [ ] **Expert review.** Have a sleep specialist review the plan logic and wording.
 - [ ] **Legal review.** Have a lawyer review the disclaimer and limitation of liability.
@@ -199,6 +195,7 @@ Open work, in rough priority order. Check items off as they ship.
 
 ### Done
 
+- [x] Live site verified: the custom domain is confirmed in GitHub Pages and "Enforce HTTPS" is on.
 - [x] Today card, shorter setup with More options, and an automatic season and holiday theme.
 - [x] Airport coverage expanded to about 3,100 airports worldwide.
 - [x] Search and sharing metadata: description, canonical URL, Open Graph and X (Twitter) link previews with a 1200×630 image, structured data, robots.txt, and sitemap.xml.
@@ -218,5 +215,7 @@ The app is provided "as is" and "as available," without warranties of any kind, 
 - Title font: Instrument Serif, SIL Open Font License (see `docs/assets/fonts/OFL.txt`).
 - Airport codes, names, and locations: [OurAirports](https://ourairports.com/data/), public domain.
 - Airport time zones: [mwgg/Airports](https://github.com/mwgg/Airports), MIT License, Copyright (c) 2014 mwgg. Zones that were wrong for the airport's country were corrected (see `TZ_FIX` in `tools/build-airports.py`).
+
+<img src="docs/assets/img/icon-512.png" alt="Jet Lag &amp; Recovery app icon" width="96" height="96">
 
 © 2026 All Trips Considered. All rights reserved.
