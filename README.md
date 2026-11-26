@@ -1,6 +1,6 @@
 # Jet Lag & Recovery
 
-<img src="assets/icons/icon-512.png" alt="Jet Lag &amp; Recovery app icon: a traveler asleep in bed under a globe, with a plane circling and a clock turning back" width="160" height="160">
+<img src="assets/img/icon-512.png" alt="Jet Lag &amp; Recovery app icon: a traveler asleep in bed under a globe, with a plane circling and a clock turning back" width="160" height="160">
 
 By All Trips Considered. Its short name, **Jet Lag**, is used for home screen labels. A progressive web app (PWA) that helps frequent flyers recover from jet lag. Enter your flight and normal sleep pattern, and it builds a day-by-day plan for sleep, light, caffeine, and hydration.
 
@@ -33,7 +33,7 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 - The Flight, Hydration, and Recovery tabs each end with a not-advice reminder.
 - The footer states the app is not health advice, is provided as is, and links to the full disclaimer and limitation of liability.
 - **Footer:** the app icon sits centered above the copyright line, which links to All Trips Considered. Below it, **Travel Tools** links to the other All Trips Considered apps (the same section as the Schengen 90/180 app): a row of buttons on wider screens and a list on phones, with "You are here" on the app being viewed.
-- **Security:** a strict Content-Security-Policy lets only this site's own scripts, styles, fonts, and images load. There is no inline script or inline style markup, and development files (tests, tools, design) are left off the published site.
+- **Security:** a strict Content-Security-Policy lets only this site's own scripts, styles, fonts, and images load. There is no inline script or inline style markup, and development files (tools, design) are left off the published site.
 - Exported calendar events carry a not-advice note.
 
 ## Project structure
@@ -46,10 +46,10 @@ robots.txt               Lets search engines crawl the site and points to the si
 sitemap.xml              Page list for search engines
 css/
   styles.css             Theme tokens, season and holiday palettes, layout, decorations
-assets/icons/            App icons generated from design/icon-source.png:
-                           icon-192.png, icon-512.png (rounded), apple-touch-icon.png (iPhone),
-                           icon-maskable-512.png (Android), favicon-32.png (browser tab)
-assets/og-image.jpg      1200×630 preview image for shared links, with the app icon
+assets/img/              All images: app icons generated from design/icon-source.png
+                           (icon-192.png, icon-512.png rounded, apple-touch-icon.png for iPhone,
+                           icon-maskable-512.png for Android, favicon-32.png for the browser tab)
+                           and og-image.jpg, the 1200×630 preview image for shared links
 design/icon-source.png   Full-size original of the app icon (not published)
 assets/fonts/            Instrument Serif for the title and copyright (SIL Open Font License, see OFL.txt)
 js/
@@ -129,7 +129,6 @@ Open work, in rough priority order. Check items off as they ship.
 ### Done
 
 - [x] Today card, shorter setup with More options, and an automatic season and holiday theme.
-- [x] Automated tests in the repository, run by GitHub Actions on every push.
 - [x] Airport coverage expanded to about 3,100 airports worldwide.
 - [x] Search and sharing metadata: description, canonical URL, Open Graph and X (Twitter) link previews with a 1200×630 image, structured data, robots.txt, and sitemap.xml.
 - [x] Brand name set to All Trips Considered, with links to alltripsconsidered.com.
@@ -148,20 +147,6 @@ python3 tools/build-airports.py path/to/airports.csv path/to/airports.json
 The script keeps airports with scheduled passenger service, skips codes already in the hand-picked
 list, checks every time zone against the system time zone database, and reports any zone that looks
 wrong for the airport's country or longitude. Fix those in `TZ_FIX` inside the script.
-
-## Tests
-
-Logic tests (plan math, holidays, airport search) run directly in Node. Browser tests (screens, Today card,
-return trip, install reminder, device defaults, theme, and layout at five screen widths) run in headless
-Chromium through Playwright. GitHub Actions runs everything on every push and pull request
-(`.github/workflows/test.yml`).
-
-```sh
-npm ci
-npx playwright install chromium   # once
-npm test                          # everything
-npm run test:logic                # fast logic tests only
-```
 
 ## Run locally
 

@@ -1,6 +1,6 @@
 /* Jet Lag & Recovery service worker: offline-first app shell. */
 // Bump the version whenever any cached file changes so clients pick up the update.
-const CACHE = 'atc-v53';
+const CACHE = 'atc-v54';
 const ASSETS = [
   './',
   './index.html',
@@ -41,11 +41,11 @@ const ASSETS = [
   './js/ui/to-top.js',
   './js/ui/travel-tools.js',
   './assets/fonts/instrument-serif-latin.woff2',
-  './assets/icons/icon-192.png',
-  './assets/icons/icon-512.png',
-  './assets/icons/icon-maskable-512.png',
-  './assets/icons/apple-touch-icon.png',
-  './assets/icons/favicon-32.png',
+  './assets/img/icon-192.png',
+  './assets/img/icon-512.png',
+  './assets/img/icon-maskable-512.png',
+  './assets/img/apple-touch-icon.png',
+  './assets/img/favicon-32.png',
 ];
 
 self.addEventListener('install', (event) => {
