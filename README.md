@@ -216,6 +216,8 @@ The app is provided "as is" and "as available," without warranties of any kind, 
 - Airport codes, names, and locations: [OurAirports](https://ourairports.com/data/), public domain.
 - Airport time zones: [mwgg/Airports](https://github.com/mwgg/Airports), MIT License, Copyright (c) 2014 mwgg. Zones that were wrong for the airport's country were corrected (see `TZ_FIX` in `tools/build-airports.py`).
 
-<img src="docs/assets/img/icon-512.png" alt="Jet Lag &amp; Recovery app icon" width="96" height="96">
+<p align="center">
+  <img src="docs/assets/img/icon-512.png" alt="Jet Lag &amp; Recovery app icon" width="96" height="96">
+</p>
 
-© 2026 All Trips Considered. All rights reserved.
+<p align="center">© 2026 All Trips Considered. All rights reserved.</p>
