@@ -364,7 +364,7 @@ body.has-install-banner .to-top { bottom: calc(max(12px, env(safe-area-inset-bot
 .tabs [role="tab"][aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 .pane { display: flex; flex-direction: column; gap: 12px; }
 .pane[hidden] { display: none; }
-.pane-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pane-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 
 /* ========== Day cards ========== */
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .82rem; color: var(--muted); }
