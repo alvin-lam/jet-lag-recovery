@@ -206,6 +206,7 @@ Open work, in rough priority order. Check items off as they ship.
 - [x] Airport coverage expanded to about 3,100 airports worldwide.
 - [x] Search and sharing metadata: description, canonical URL, Open Graph and X (Twitter) link previews with a 1200×630 image, structured data, robots.txt, and sitemap.xml.
 - [x] Brand name set to All Trips Considered, with links to alltripsconsidered.com.
+- [x] Add to Calendar (Apple Calendar, Google Calendar or Other with 15-minute alerts) and Share to (email with graphs, plain text, copy text or copy image). The search description, keywords and structured data feature list mention both.
 - [x] Lunar New Year, Diwali, and Hanukkah dates extended through 2036.
 
 ## Disclaimer
