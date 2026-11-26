@@ -1,5 +1,7 @@
 # Jet Lag & Recovery
 
+<img src="assets/icons/icon-512.png" alt="Jet Lag &amp; Recovery app icon: a traveler asleep in bed under a globe, with a plane circling and a clock turning back" width="160" height="160">
+
 By All Trips Considered. Its short name, **Jet Lag**, is used for home screen labels. A progressive web app (PWA) that helps frequent flyers recover from jet lag. Enter your flight and normal sleep pattern, and it builds a day-by-day plan for sleep, light, caffeine, and hydration.
 
 > **Not health advice.** Jet Lag & Recovery provides general information for educational purposes only. It is not medical, health, or nutritional advice and does not replace a qualified health professional. The app is provided "as is," without warranties, and its creators are not liable for any damages arising from its use. See [Disclaimer](#disclaimer).
@@ -18,10 +20,10 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 - **Calendar export** (`.ics`).
 - **Device defaults:** the clock (12- or 24-hour), water units, and body weight unit follow the device's region settings, for example 12-hour, ounces, and pounds in the US, and 24-hour, liters, and kilograms in most other places. Dates use the region's date order in English ("Wed, Dec 2" in the US, "Tue 1 Dec" in the UK). The Clock and Water units menus offer "Device setting" plus fixed choices, and Reset returns to the device defaults.
 - **Short setup:** flight, return flight, and normal sleep are up front. Caffeine, water, plan style, clock, and units sit in a collapsed "More options."
-- **Appearance menu** (palette icon in the header): light, dark, or system mode, and a Theme menu. "Automatic (seasons and holidays)" is the default: colors follow the season and switch to a holiday's colors while it is on. Two groups let travelers pick instead: **Seasons** (the current season only, or Spring 🌸, Summer ☀️, Autumn 🍂, Winter ❄️) and **Holidays** (any one holiday, such as Christmas 🎄 or Pride Month 🏳️‍🌈). Automatic seasons use the hemisphere of the device time zone, and US-only holidays appear automatically only in US time zones.
+- **Appearance panel** (half-filled circle in the header, matching atc-pwa-template): **Mode** (Auto, Light, Dark), **Color**, and **Decorations**. In Color, **Automatic** is the default: colors follow the season and switch to a holiday's colors while it is on. Travelers can pick instead from **Current season**, **Seasons** (Spring 🌸, Summer ☀️, Autumn 🍂, Winter ❄️) or **Holidays** (any one holiday, such as Christmas 🎄 or Pride Month 🏳️‍🌈). Each row shows a color swatch. A checkbox turns seasonal and holiday decorations on or off. Automatic seasons use the hemisphere of the device time zone, and US-only holidays appear automatically only in US time zones.
 - **Automatic decorations:** holidays get a garland, falling decorations, and corner accents; seasons get a lighter set. One switch in the Appearance menu turns them off. Animation stops when the device asks for reduced motion.
 - **Back to top** button in the lower right once you scroll past the header.
-- **Installable and offline:** works without a connection after the first visit. Browsers with an install prompt (Chrome, Edge, Samsung Internet) get a one-tap Install button. Where there is no prompt, a reminder explains how to add the app: Share, then Add to Home Screen on iPhone and iPad; the browser menu on Android. Desktop browsers without an install prompt, such as Safari on a Mac, show no install icon or reminder. The reminder waits until the disclaimer is accepted, can be dismissed for 14 days, and never appears once the app is installed. A download icon in the header reopens it.
+- **Installable and offline:** works without a connection after the first visit. Browsers with an install prompt (Chrome, Edge, Samsung Internet) get a one-tap Install button. Where there is no prompt, a reminder explains how to add the app: Share, then Add to Home Screen on iPhone and iPad; the browser menu on Android. Desktop browsers without an install prompt, such as Safari on a Mac, show no install icon or reminder. The reminder waits until the disclaimer is accepted, can be closed for 24 hours, and never appears once the app is installed. When a new version is ready, an "Update available" banner offers a Refresh.
 - **Private:** all data stays in the browser's local storage on your device.
 
 ## Health and liability notices in the app
@@ -42,14 +44,18 @@ robots.txt               Lets search engines crawl the site and points to the si
 sitemap.xml              Page list for search engines
 css/
   styles.css             Theme tokens, season and holiday palettes, layout, decorations
-assets/icons/            App icons (SVG source and generated PNGs)
-assets/og-image.jpg      1200×630 preview image for shared links
+assets/icons/            App icons generated from design/icon-source.png:
+                           icon-192.png, icon-512.png (rounded), apple-touch-icon.png (iPhone),
+                           icon-maskable-512.png (Android), favicon-32.png (browser tab)
+assets/og-image.jpg      1200×630 preview image for shared links, with the app icon
+design/icon-source.png   Full-size original of the app icon (not published)
 assets/fonts/            Instrument Serif for the title and copyright (SIL Open Font License, see OFL.txt)
 js/
   main.js                Entry point: wires state, model, and views
   config.js              Defaults, storage keys, and all model constants
   state.js               The single store for trip, sleep logs, and appearance
-  pwa.js                 Service worker registration and install button
+  boot.js                Runs before first paint: saved color mode and the CSP-safe style helper
+  pwa.js                 Service worker registration and the Update available banner
   data/
     airports.js          Hand-picked major airports: code, city, country, time zone, aliases
     airports-world.js    Generated list of other airports with scheduled flights (see tools/)
