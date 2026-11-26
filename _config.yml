@@ -1,7 +1,0 @@
-# GitHub Pages builds this site with Jekyll. These files are for development only,
-# so leave them out of the published site.
-exclude:
-  - tools/
-  - node_modules/
-  - README.md
-  - design/

@@ -38,6 +38,8 @@ By All Trips Considered. Its short name, **Jet Lag**, is used for home screen la
 
 ## Project structure
 
+Everything the site serves lives in `docs/`, which GitHub Pages publishes. Development files (this README, `design/` and `tools/`) stay at the repository root. Paths below for site files are relative to `docs/`.
+
 ```
 index.html               Page markup, dialogs (disclaimer, sleep check-in, appearance)
 manifest.webmanifest     Install metadata
@@ -150,10 +152,10 @@ wrong for the airport's country or longitude. Fix those in `TZ_FIX` inside the s
 
 ## Run locally
 
-No build step or dependencies. Serve the folder over HTTP, because ES modules and the service worker do not load from `file://`:
+No build step or dependencies. Serve the `docs/` folder over HTTP, because ES modules and the service worker do not load from `file://`:
 
 ```sh
-python3 -m http.server 8000
+python3 -m http.server 8000 --directory docs
 # then open http://localhost:8000
 ```
 
@@ -161,7 +163,7 @@ When you change any cached file, bump `CACHE` in `sw.js` so installed copies upd
 
 ## Deploy
 
-Any static host works, including GitHub Pages. Publish the repository root.
+Any static host works, including GitHub Pages. Publish the `docs/` folder: in GitHub Pages, use **Settings > Pages > Deploy from a branch**, branch `prod`, folder `/docs`.
 
 The site is served at `https://jetlag.alltripsconsidered.com/` (see `CNAME`). The canonical URL, Open Graph and X image URLs, structured data, `robots.txt`, and `sitemap.xml` all use that address, so update them together if the domain changes. Update `<lastmod>` in `sitemap.xml` when the page changes meaningfully.
 

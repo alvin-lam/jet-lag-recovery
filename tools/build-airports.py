@@ -23,8 +23,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 ROOT = Path(__file__).resolve().parent.parent
-CURATED = ROOT / 'js' / 'data' / 'airports.js'
-OUT = ROOT / 'js' / 'data' / 'airports-world.js'
+CURATED = ROOT / 'docs' / 'js' / 'data' / 'airports.js'
+OUT = ROOT / 'docs' / 'js' / 'data' / 'airports-world.js'
 
 # Zones newer than some browsers' time zone data, mapped to an older zone with the same rules.
 TZ_COMPAT = {
