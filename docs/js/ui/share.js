@@ -1,4 +1,4 @@
-// "Share to": send the plan by email with the daily graphs (as an image) or as plain text, or copy the text.
+// "Share to": send the plan by email with the daily graphs (as an image) or as plain text, or copy the text or the image.
 // Browsers cannot attach files to a mailto: link, so "Email with graphs" uses the device share sheet
 // (Mail, Gmail, Outlook...) where it supports files, and otherwise saves the image to attach by hand.
 import { $ } from '../lib/util.js';
@@ -114,6 +114,17 @@ export function setupShare(getPlans) {
     const kind = btn.dataset.share;
 
     if (kind === 'text') { location.href = mailto(subject, text); return; }
+
+    if (kind === 'copy-image') {
+      // Safari needs the clipboard write to start inside the tap, so hand it the image as a promise.
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': planImage(plan, back) })]);
+        status.textContent = 'Image copied. Paste it into an email, message or document.';
+      } catch {
+        status.textContent = 'Copying images is not available in this browser. Use Email with graphs instead.';
+      }
+      return;
+    }
 
     if (kind === 'copy') {
       try { await navigator.clipboard.writeText(text); status.textContent = 'Copied. Paste it into any email or message.'; }
