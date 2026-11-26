@@ -1,10 +1,10 @@
 # Jet Lag & Recovery
 
-<img src="docs/assets/img/icon-512.png" alt="Jet Lag &amp; Recovery app icon: a traveler asleep in bed under a globe, with a plane circling and a clock turning back" width="160" height="160">
-
 Jet Lag & Recovery is a progressive web app (PWA) by All Trips Considered that helps frequent flyers recover from jet lag. Enter your flight and normal sleep pattern, and it builds a day-by-day plan for sleep, light, caffeine, and hydration.
 
 Live site: https://jetlag.alltripsconsidered.com/
+
+![Jet Lag & Recovery link preview](docs/assets/img/og-image.jpg)
 
 ## Features
 
@@ -215,5 +215,7 @@ The app is provided "as is" and "as available," without warranties of any kind, 
 - Title font: Instrument Serif, SIL Open Font License (see `docs/assets/fonts/OFL.txt`).
 - Airport codes, names, and locations: [OurAirports](https://ourairports.com/data/), public domain.
 - Airport time zones: [mwgg/Airports](https://github.com/mwgg/Airports), MIT License, Copyright (c) 2014 mwgg. Zones that were wrong for the airport's country were corrected (see `TZ_FIX` in `tools/build-airports.py`).
+
+<img src="docs/assets/img/icon-512.png" alt="Jet Lag &amp; Recovery app icon" width="96" height="96">
 
 © 2026 All Trips Considered. All rights reserved.
