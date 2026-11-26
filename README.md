@@ -60,7 +60,10 @@ docs/assets/img/icon-192.png            App icon, 192 px
 docs/assets/img/icon-512.png            App icon, 512 px, rounded
 docs/assets/img/icon-maskable-512.png   Maskable app icon for Android
 docs/assets/img/apple-touch-icon.png    Home screen icon for iPhone and iPad
-docs/assets/img/favicon-32.png          Browser tab icon
+docs/assets/img/favicon-32.png          App icon, 32 px
+docs/assets/img/tabicon-32.png          Browser tab icon: All Trips Considered artwork, 32 px
+docs/assets/img/tabicon-192.png         Browser tab icon: All Trips Considered artwork, 192 px
+docs/favicon.ico                        Favicon: the app icon (16, 32 and 48 px)
 docs/assets/img/og-image.jpg            1200×630 preview image for shared links
 docs/assets/fonts/instrument-serif-latin.woff2   Instrument Serif for the title and copyright
 docs/assets/fonts/OFL.txt               SIL Open Font License for Instrument Serif
