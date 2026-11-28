@@ -2,6 +2,7 @@
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, dirname, resolve, posix } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { CHECKS } from './report.mjs';
 
 const read = (p) => readFileSync(p, 'utf8');
 
@@ -31,11 +32,12 @@ function checkServiceWorker(r, docs, files) {
   if (!cache) r.fail('sw.js: CACHE name not found');
   const listed = new Set(assets.map((a) => a.replace(/^\.\//, '')).filter(Boolean));
   const missingOnDisk = [...listed].filter((a) => a !== '' && !existsSync(join(docs, a)));
-  r.check('fail', 'Every file in the sw.js ASSETS list exists (a missing one breaks offline install)', missingOnDisk);
+  const sw = { where: 'docs/sw.js, `ASSETS`', confidence: 'Likely', evidence: 'Compared the ASSETS list with the files in docs/.' };
+  r.check('fail', 'Every file in the sw.js ASSETS list exists (a missing one breaks offline install)', missingOnDisk, sw);
   const dupes = assets.filter((a, i) => assets.indexOf(a) !== i);
-  r.check('warn', 'No duplicate ASSETS entries', dupes);
+  r.check('warn', 'No duplicate ASSETS entries', dupes, sw);
   const notListed = files.filter((f) => !NOT_CACHED.has(f) && !listed.has(f));
-  r.check('fail', 'Every served file is in the offline cache, or deliberately left out', notListed);
+  r.check('fail', 'Every served file is in the offline cache, or deliberately left out', notListed, sw);
 }
 
 // ---------- ES module imports ----------
@@ -72,7 +74,7 @@ function checkImports(r, docs, files) {
       }
     }
   }
-  r.check('fail', 'Every import resolves to a file and a real export', problems);
+  r.check('fail', 'Every import resolves to a file and a real export', problems, { confidence: 'Likely', evidence: 'Parsed every import statement in docs/js.' });
 
   // Modules nothing imports and no page loads are dead weight in the cache.
   const html = files.filter((f) => f.endsWith('.html')).map((f) => read(join(docs, f))).join('\n');
@@ -146,7 +148,7 @@ function checkSelectors(r, docs, files) {
       if (!ids.has(m[1]) && !made.has(m[1])) problems.push(`${f}: getElementById('${m[1]}') is not in index.html`);
     }
   }
-  r.check('fail', 'Every #id the scripts look up exists in the page', [...new Set(problems)]);
+  r.check('fail', 'Every #id the scripts look up exists in the page', [...new Set(problems)], { confidence: 'Likely', evidence: 'Matched $(\'#id\') and getElementById calls with ids in docs/index.html.' });
 }
 
 // ---------- Manifest and icons ----------
@@ -255,7 +257,7 @@ function checkCacheBump(r, docs, baseRef) {
     changed.push(...git('diff', '--name-only', 'HEAD', '--', 'docs').split('\n').filter(Boolean));
     var oldSw = git('show', `${mergeBase}:docs/sw.js`);
   } catch {
-    return r.skip(`Cache name bumped for changed files (no git ref "${baseRef}")`);
+    return r.skip(`Cache name bumped for changed files`, `git ref "${baseRef}" not found; run git fetch origin prod or pass --base`);
   }
   const { cache, assets } = swInfo(docs);
   const cached = new Set(assets.map((a) => 'docs/' + a.replace(/^\.\//, '')));
@@ -264,7 +266,11 @@ function checkCacheBump(r, docs, baseRef) {
   if (!touched.length) return r.pass(`No cached file changed since ${baseRef}`);
   if (cache === oldCache) {
     r.fail(`Cache name bumped for changed files (still "${cache}")`,
-      `Cached files changed since ${baseRef}, so installed copies will keep the old version:\n` + touched.map((t) => '• ' + t).join('\n'));
+      `Cached files changed since ${baseRef}, but CACHE is unchanged, so installed copies keep the old files:\n` + touched.map((t) => '• ' + t).join('\n'), null, {
+        where: 'docs/sw.js, `const CACHE`', steps: `Compare docs/ with ${baseRef}.`,
+        expected: 'CACHE is bumped whenever a cached file changes (README, "Releasing an update").',
+        evidence: `git diff against the merge base with ${baseRef}.`,
+      });
   } else r.pass(`Cache name bumped (${oldCache} → ${cache}) for ${touched.length} changed file(s)`);
 }
 
@@ -282,15 +288,17 @@ function checkLeftovers(r, docs, files) {
 }
 
 export async function runStatic(r, { docs, today, baseRef }) {
-  r.start('Static checks');
+  r.start('Static checks', CHECKS.release);
   const files = walk(docs).map((p) => relative(docs, p).split('\\').join('/'));
   checkServiceWorker(r, docs, files);
   checkCacheBump(r, docs, baseRef);
   checkImports(r, docs, files);
   checkHtml(r, docs, files);
-  checkSelectors(r, docs, files);
   checkManifest(r, docs);
   checkDomain(r, docs, today);
-  checkReadme(r, docs, files);
   checkLeftovers(r, docs, files);
+  r.under(CHECKS.display);
+  checkSelectors(r, docs, files);
+  r.under(CHECKS.readme);
+  checkReadme(r, docs, files);
 }

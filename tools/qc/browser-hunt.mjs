@@ -4,6 +4,8 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 import { createRequire } from 'node:module';
+import { mkdirSync } from 'node:fs';
+import { CHECKS } from './report.mjs';
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -39,7 +41,10 @@ function loadPlaywright() {
 // Records anything that went wrong on a page.
 function watch(page) {
   const log = { errors: [], csp: [], failed: [] };
-  page.on('pageerror', (e) => log.errors.push('uncaught: ' + e.message));
+  page.on('pageerror', (e) => {
+    const at = (String(e.stack).split('\n').find((l) => /\s+at /.test(l)) || '').trim().replace(/https?:\/\/[^/]+\//, 'docs/');
+    log.errors.push('uncaught: ' + e.message + (at ? ` (${at})` : ''));
+  });
   page.on('console', (m) => {
     if (m.type() === 'error') log.errors.push('console.error: ' + m.text().slice(0, 200));
   });
@@ -102,9 +107,9 @@ const SCENARIOS = [
 ];
 
 export async function runBrowser(r, { docs, screens }) {
-  r.start('Browser hunt (headless Chromium)');
+  r.start('Browser hunt (headless Chromium)', CHECKS.display);
   const pw = loadPlaywright();
-  if (!pw) return r.skip('Playwright is not installed, so the browser checks were skipped', 'Install it with: npm i -g playwright && npx playwright install chromium');
+  if (!pw) return r.skip('Browser checks (display, dialogs, odd input, offline)', 'Playwright is not installed. Install it with: npm i -g playwright && npx playwright install chromium');
   let browser;
   try { browser = await pw.chromium.launch(); } catch (e) {
     try { browser = await pw.chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }); } catch { return r.skip('Chromium would not start', e.message.split('\n')[0]); }
@@ -113,6 +118,15 @@ export async function runBrowser(r, { docs, screens }) {
   const url = `http://127.0.0.1:${server.address().port}/`;
   const depDate = new Date(Date.now() + 9 * 86400000).toISOString().slice(0, 10);
   const shots = [];
+  const evidenceDir = join(docs, '..', 'test-results', 'qc-evidence');
+  let shotN = 0;
+  /** Screenshot kept as evidence for a finding. Returns its path relative to the repository. */
+  const evidence = async (page, name) => {
+    mkdirSync(evidenceDir, { recursive: true });
+    const file = join(evidenceDir, `${String(++shotN).padStart(2, '0')}-${name.replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 60)}.png`);
+    await page.screenshot({ path: file, fullPage: false }).catch(() => {});
+    return 'test-results/qc-evidence/' + file.split('/').pop();
+  };
 
   const run = async (label, ctxOpts, body) => {
     const ctx = await browser.newContext({ serviceWorkers: 'block', ...ctxOpts });
@@ -126,7 +140,10 @@ export async function runBrowser(r, { docs, screens }) {
     }
     const csp = await page.evaluate(() => window.__csp || []).catch(() => []);
     const problems = [...log.errors, ...csp.map((c) => 'CSP violation: ' + c), ...log.failed.map((f) => 'request failed: ' + f)];
-    r.check('fail', `${label}: no errors, CSP violations or failed requests`, [...new Set(problems)]);
+    r.under(CHECKS.display);
+    r.check('fail', `${label}: no errors, CSP violations or failed requests`, [...new Set(problems)], {
+      where: 'Browser console', steps: `Open the app: ${label}.`, evidence: problems.length ? 'Recorded by Playwright: ' + await evidence(page, label) : '',
+    });
     if (screens) {
       const file = join(screens, label.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png');
       await page.screenshot({ path: file, fullPage: true }).catch(() => {});
@@ -146,11 +163,13 @@ export async function runBrowser(r, { docs, screens }) {
     sink.ids.push(...tag(a.ids));
     if (!acc) report(label, sink);
   };
-  const report = (label, a) => {
-    r.check('fail', `${label}: no NaN, undefined or null shown to the traveler`, a.junk);
-    r.check('fail', `${label}: no sideways scrolling`, a.overflow);
-    r.check('warn', `${label}: buttons, inputs and images are labelled`, [...new Set(a.a11y)]);
-    r.check('fail', `${label}: no duplicate ids after rendering`, [...new Set(a.ids)]);
+  const report = (label, a, page) => {
+    r.under(CHECKS.display);
+    const meta = { steps: `Open the app: ${label}.`, evidence: 'Read from the rendered page in headless Chromium.' };
+    r.check('fail', `${label}: no NaN, undefined or null shown to the traveler`, a.junk, meta);
+    r.check('fail', `${label}: no sideways scrolling`, a.overflow, meta);
+    r.check('warn', `${label}: buttons, inputs and images are labelled`, [...new Set(a.a11y)], meta);
+    r.check('fail', `${label}: no duplicate ids after rendering`, [...new Set(a.ids)], meta);
   };
 
   const seed = async (ctx, trip) => {
@@ -205,6 +224,7 @@ export async function runBrowser(r, { docs, screens }) {
       if (swatches > 3) r.pass(`Appearance panel lists ${swatches} color choices`); else r.warn('Appearance panel lists its color choices', `only ${swatches} found`);
       await page.keyboard.press('Escape');
 
+      r.under(CHECKS.export);
       await page.click('#ics-btn');
       await page.click('[data-cal=google]');
       const links = await page.locator('#cal-google-list a').count();
@@ -230,6 +250,7 @@ export async function runBrowser(r, { docs, screens }) {
       if (shareOpen) r.pass('Share dialog opens'); else r.fail('Share dialog opens');
       await page.click('#share-close');
 
+      r.under(CHECKS.data);
       await page.fill('#home', 'tromso');
       await page.waitForTimeout(250);
       const opts = await page.locator('#home-list [role=option]').allInnerTexts();
@@ -240,21 +261,36 @@ export async function runBrowser(r, { docs, screens }) {
       const expanded = await page.getAttribute('#home', 'aria-expanded');
       if (expanded === 'false') r.pass('Choosing a search result closes the list'); else r.warn('Choosing a search result closes the list', `aria-expanded=${expanded}`);
 
+      r.under(CHECKS.display);
       // Reset restores the defaults and still renders.
       await page.click('#reset-btn');
       await page.waitForTimeout(200);
       if ((await page.locator('#days > *').count()) > 0) r.pass('Reset still shows a plan'); else r.fail('Reset still shows a plan');
 
       // Typing odd values should never break the page. The form has novalidate, so min and max are not enforced.
-      const before = log.errors.length;
-      for (const [sel, v] of [['#durH', ''], ['#tripDays', '-4'], ['#durM', '999'], ['#tripDays', '0'], ['#durH', '30']]) {
+      r.under(CHECKS.edge);
+      const ODD = [['#durH', ''], ['#tripDays', '-4'], ['#durM', '999'], ['#tripDays', '0'], ['#durH', '30'], ['#tripDays', '2.5'], ['#durM', '-15']];
+      for (const [sel, v] of ODD) {
+        await page.click('#reset-btn');
+        await page.waitForTimeout(100);
+        const before = log.errors.length;
         await page.fill(sel, v);
-        await page.waitForTimeout(150);
-        if (log.errors.length > before && !log.errors[log.errors.length - 1].startsWith('[')) {
-          log.errors[log.errors.length - 1] = `[after typing "${v}" into ${sel}] ` + log.errors[log.errors.length - 1];
-        }
+        await page.waitForTimeout(200);
+        const errs = log.errors.splice(before);
+        const junk = (await page.evaluate(pageAudit)).junk;
+        const name = `Typing "${v}" into ${sel} keeps the page working`;
+        if (!errs.length && !junk.length) { r.pass(name); continue; }
+        const crash = errs.some((e) => /reading 'bed'/.test(e));
+        r.fail(crash ? `Typing "${v}" into the trip length crashes the plan` : name, '', null, {
+          where: crash ? 'docs/js/ui/plan-view.js:38 (`p.days[0]` is undefined), docs/js/core/model.js:216 (`minDays` goes negative), docs/index.html:165 (`novalidate` skips min="1")' : `docs/index.html (${sel})`,
+          steps: `Accept the disclaimer, press Reset, then type "${v}" into ${sel}.`,
+          expected: 'The value is rejected or clamped and the plan updates, with no error.',
+          actual: [...errs, ...junk.map((j) => 'page shows: ' + j)].join('\n') + (crash ? '\nThe summary stops rendering and the rest of the page keeps the previous plan.' : ''),
+          evidence: 'Reproduced in headless Chromium; screenshot ' + await evidence(page, name),
+        });
       }
-      await audit(page, 'After out-of-range inputs');
+      r.under(CHECKS.display);
+      await page.click('#reset-btn');
     });
 
     // 2. Each tricky trip, on a phone in different regions.
@@ -278,11 +314,12 @@ export async function runBrowser(r, { docs, screens }) {
           await page.waitForTimeout(50);
           await audit(page, (await t.innerText()).replace(/\s+/g, ' ').replace(/PREVIEW/i, '').trim() + ' tab', acc);
         }
-        report(`${label}, every tab`, acc);
+        report(`${label}, every tab`, acc, page);
       });
     }
 
     // 3. Offline: once the service worker has cached the app, a reload without a network still works.
+    r.under(CHECKS.release);
     {
       const ctx = await browser.newContext({ viewport: { width: 1000, height: 800 } });
       await ctx.addInitScript(INIT);

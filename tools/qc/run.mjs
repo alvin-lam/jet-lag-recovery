@@ -9,12 +9,15 @@
 //   node tools/qc/run.mjs --base prod     git ref the cache bump check compares with (default origin/prod)
 //   node tools/qc/run.mjs --screens       save full-page screenshots of every browser scenario
 //   node tools/qc/run.mjs --strict        exit with an error on warnings too
+//   node tools/qc/run.mjs --verbose       print passed checks in the console too
 //
-// A Markdown report is written to qc-report.md at the repository root (ignored by git).
+// A Markdown report is written to qc-report.md at the repository root (ignored by git), in the same layout
+// as the points-calculator QC & Bug Hunter. Screenshots kept as evidence go to test-results/qc-evidence/.
 // Exit code: 0 when nothing failed, 1 when something failed.
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { Report } from './report.mjs';
 import { runStatic } from './static-checks.mjs';
 import { runModel } from './model-hunt.mjs';
@@ -30,7 +33,7 @@ const value = (name, fallback) => {
   return i >= 0 && args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : fallback;
 };
 if (flag('help') || flag('h')) {
-  console.log(String((await import('node:fs')).readFileSync(fileURLToPath(import.meta.url), 'utf8')).split('\n').slice(1, 14).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
+  console.log(String((await import('node:fs')).readFileSync(fileURLToPath(import.meta.url), 'utf8')).split('\n').slice(1, 17).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
   process.exit(0);
 }
 
@@ -42,6 +45,9 @@ const baseRef = value('base', 'origin/prod');
 const screens = flag('screens') ? join(root, 'test-results', 'qc-screens') : null;
 if (screens) mkdirSync(screens, { recursive: true });
 const today = new Date().toISOString().slice(0, 10);
+rmSync(join(root, 'test-results', 'qc-evidence'), { recursive: true, force: true }); // screenshots from an earlier run
+const git = (...a) => { try { return execFileSync('git', a, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return '?'; } };
+const dirty = git('status', '--porcelain', '--', 'docs') ? ' + uncommitted changes' : '';
 
 console.log(`QC & Bug Hunter · seed ${seed} · ${[...parts].join(', ')}`);
 const r = new Report();
@@ -56,6 +62,9 @@ try {
 }
 const c = r.summary();
 const reportPath = join(root, 'qc-report.md');
-writeFileSync(reportPath, r.markdown({ when: new Date().toISOString(), seed, cases }));
+writeFileSync(reportPath, r.markdown({
+  when: new Date().toISOString().replace('T', ' ').slice(0, 16) + ' UTC', seed, cases, parts: [...parts].join(', '),
+  branch: git('rev-parse', '--abbrev-ref', 'HEAD'), commit: git('rev-parse', '--short', 'HEAD') + dirty,
+}));
 console.log(`  Report: ${reportPath} · ${((Date.now() - started) / 1000).toFixed(1)} s · replay with --seed ${seed}\n`);
 process.exit(c.fail || (flag('strict') && c.warn) ? 1 : 0);

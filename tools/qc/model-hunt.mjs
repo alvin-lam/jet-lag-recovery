@@ -2,6 +2,7 @@
 // the calendar file and the shared plan text. Random trips are seeded so every finding can be replayed.
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
+import { CHECKS } from './report.mjs';
 
 // ---------- Seeded random numbers ----------
 export function rng(seed) {
@@ -232,6 +233,70 @@ const WARN_ONLY = /75 octets|2,000 characters|implausible sleep window|never rea
 
 const TEXT_JUNK = /\b(NaN|undefined|Infinity)\b|\[object Object\]|\bnull\b/;
 
+// How each fuzz invariant reads in the report: its check heading, the code behind it and what should happen.
+const META = [
+  [/calendar sleep events overlap/, { check: CHECKS.export, title: 'Calendar export has overlapping sleep events when the return flight comes before the end of the outbound plan',
+    where: 'docs/js/ui/ics.js:35 (every outbound day is exported), docs/js/core/model.js:324 (return plan)',
+    expected: 'Outbound nights stop when the return flight leaves, so no two sleep events overlap.',
+    actual: 'Outbound nights after the return date are still exported, on top of the nights back home.' }],
+  [/pre-departure dates are not consecutive/, { check: CHECKS.plan, title: 'Pre-adjust nights can stop short of departure, leaving the night before the flight unplanned',
+    where: 'docs/js/core/model.js:197 (`addDays(trip.depDate, j - preDays - 1)`)',
+    expected: 'Pre-adjust nights fall on the days right before departure.',
+    actual: 'When the shift is used up in fewer days than chosen, the dates still count back from the chosen number, so the last pre-adjust night is not the night before the flight. Date shown ≠ date expected:' }],
+  [/return flight departs before the outbound flight lands/, { check: CHECKS.plan, title: 'A return flight that leaves before the outbound flight lands is accepted',
+    where: 'docs/js/core/model.js:324 (compares dates only)',
+    expected: 'An error such as "The return flight leaves before you arrive. Choose a later time."',
+    actual: '' }],
+  [/post-landing sleep is longer than 16 h/, { check: CHECKS.plan, title: '"Stay on home time" can plan a sleep after landing of more than 24 hours',
+    where: 'docs/js/core/model.js:231 (bed and wake not wrapped), docs/js/core/model.js:251 (`arrHour + 1 < wake`)',
+    expected: 'Sleep after landing runs from about an hour after landing to the wake time, a few hours at most.',
+    actual: 'Wake time is left above 24, so the post-landing sleep spans more than a day and the daily graph fills the whole arrival day with sleep. Interval:' }],
+  [/light advice falls during planned sleep/, { check: CHECKS.plan, where: 'docs/js/core/model.js (`awakeLight`)', expected: 'Light advice only while awake.' }],
+  [/light advice falls during the post-landing sleep/, { check: CHECKS.plan, where: 'docs/js/core/model.js (`awakeLight` ignores `arrivalSleep`)', expected: 'No light advice while sleeping after landing.' }],
+  [/light advice starts before landing/, { check: CHECKS.plan, where: 'docs/js/core/model.js (`awakeLight`)', expected: 'Arrival-day light advice starts after landing.' }],
+  [/coffee dose/, { check: CHECKS.plan, where: 'docs/js/core/model.js (`caffeinePlan`)', expected: 'Coffee only while awake and before the cutoff.' }],
+  [/never reaches "adjusted"/, { check: CHECKS.plan, title: 'Very slow or very large shifts are cut off at 14 days',
+    where: 'docs/js/core/model.js:222 (`MODEL.maxPlanDays`)', expected: 'The plan covers every day needed, or says clearly that it stops at 14 days.',
+    actual: 'The plan ends at 14 days while the summary gives a larger "Days to adjust".' }],
+  [/implausible sleep window/, { check: CHECKS.edge, title: 'The form accepts a sleep window under 3 or over 14 hours',
+    where: 'docs/index.html (`#bed`, `#wake`), docs/js/core/model.js:143', expected: 'A hint or a rejection for implausible sleep, such as bedtime equal to wake time.' }],
+  [/75 octets/, { check: CHECKS.export, title: 'Calendar file lines are not folded at 75 octets',
+    where: 'docs/js/ui/ics.js:52', expected: 'Lines longer than 75 octets are folded (RFC 5545 §3.1). Most calendar apps accept long lines, so this is a warning.' }],
+  [/Google Calendar link/, { check: CHECKS.export, where: 'docs/js/ui/ics.js (`googleUrl`)', expected: 'Links under 2,000 characters.' }],
+  [/shared (plan )?text/, { check: CHECKS.export, where: 'docs/js/ui/share.js:13 (`planText`)', expected: 'No NaN, undefined or null in the shared text.' }],
+  [/calendar export throws|planText throws/, { check: CHECKS.export, where: 'docs/js/ui/ics.js, docs/js/ui/share.js', expected: 'Export never throws.' }],
+  [/plan has no days/, { check: CHECKS.plan, title: 'A trip length below 1 gives a plan with no days', where: 'docs/js/core/model.js:216 (`minDays`)', expected: 'At least one plan day.' }],
+  [/throws|different plan|non-finite/, { check: CHECKS.plan, where: 'docs/js/core/model.js (`buildPlan`)', expected: 'A complete, finite plan for every valid trip.' }],
+];
+function metaFor(name) {
+  const bare = name.replace(/^return: /, '');
+  const hit = META.find(([re]) => re.test(bare));
+  const m = hit ? { ...hit[1] } : { check: CHECKS.plan, where: 'docs/js/core/model.js', expected: '' };
+  if (bare !== name && m.title) m.title = 'Return trip: ' + m.title[0].toLowerCase() + m.title.slice(1);
+  if (!m.title) m.title = name[0].toUpperCase() + name.slice(1);
+  return m;
+}
+
+/** A trip as the steps a person would take in the form. */
+function describeTrip(t) {
+  const place = (k) => String(k || '').replace(/^code:/, '').replace(/^tz:/, '');
+  const parts = [
+    `${place(t.home)} → ${place(t.dest)}`,
+    `depart ${t.depDate || '(no date)'} at ${t.depTime}`,
+    `flight ${t.durH} h` + (Number(t.durM) ? ` ${t.durM} min` : ''),
+    `trip ${t.tripDays} days`,
+    `bed ${t.bed}, wake ${t.wake}`,
+  ];
+  const opts = [];
+  if (t.chrono && t.chrono !== 'neutral') opts.push(`chronotype ${t.chrono}`);
+  if (t.strategy && t.strategy !== 'auto') opts.push(`plan style ${t.strategy}`);
+  if (Number(t.preDays)) opts.push(`pre-adjust ${t.preDays} day${Number(t.preDays) === 1 ? '' : 's'}`);
+  if (Number(t.pace) !== 1) opts.push(`pace ${t.pace}`);
+  if (opts.length) parts.push('More options: ' + opts.join(', '));
+  if (t.ret) parts.push(`return flight ${t.retDate || '(no date)'} at ${t.retTime}, ${t.retDurH ?? t.durH} h` + (Number(t.retDurM ?? t.durM) ? ` ${t.retDurM ?? t.durM} min` : ''));
+  return parts.join('; ') + '.';
+}
+
 export async function runModel(r, { docs, seed, cases }) {
   installShims();
   const imp = (p) => import(pathToFileURL(join(docs, p)).href);
@@ -246,20 +311,34 @@ export async function runModel(r, { docs, seed, cases }) {
   const { planText } = await imp('js/ui/share.js');
 
   // ---------- Fuzzed plans ----------
-  r.start(`Plan model fuzzing (${cases} random trips, seed ${seed})`);
+  r.start(`Plan model fuzzing (${cases.toLocaleString('en-US')} random trips, seed ${seed})`, CHECKS.plan);
   const R = rng(seed);
   const keys = LOCATIONS.map((l) => l.key);
   const found = new Map(); // invariant → { count, detail, repro }
+  let tripHit = false;
+  // Keep the simplest trip for each finding, so the report's steps are easy to follow:
+  // well-known airports, few options changed and no sleep logs.
+  const { AIRPORTS: CURATED } = await imp('js/data/airports.js');
+  const major = new Set(CURATED.map((a) => 'code:' + a[0]));
+  const simplicity = ({ trip: t, logs }) => (major.has(t.home) ? 0 : 3) + (major.has(t.dest) ? 0 : 3)
+    + Object.keys(logs || {}).length * 2 + (t.ret ? 1 : 0)
+    + ['chrono', 'strategy', 'preDays', 'pace'].filter((k) => t[k] !== TRIP_DEFAULTS[k]).length;
   const note = (name, detail, repro) => {
+    if (!WARN_ONLY.test(name)) tripHit = true;
     const f = found.get(name);
-    if (f) f.count++;
-    else found.set(name, { count: 1, detail, repro });
+    if (!f) found.set(name, { count: 1, detail, repro, score: simplicity(repro) });
+    else {
+      f.count++;
+      const sc = simplicity(repro);
+      if (sc < f.score) Object.assign(f, { detail, repro, score: sc });
+    }
   };
-  let crashes = 0;
+  let crashes = 0, clean = 0, withReturn = 0, events = 0;
   for (let i = 0; i < cases; i++) {
     const trip = randomTrip(R, keys, TRIP_DEFAULTS);
     const logs = R.chance(0.3) ? randomLogs(R, 8) : {};
     const repro = { trip, logs };
+    tripHit = false;
     let p, back;
     try {
       p = buildPlan(trip, logs);
@@ -279,17 +358,19 @@ export async function runModel(r, { docs, seed, cases }) {
       continue;
     }
     if (back && !back.error) {
+      withReturn++;
       for (const [name, detail] of planProblems(back, { ...trip, depDate: trip.retDate }, MODEL)) note('return: ' + name, detail, repro);
       if (back.depUtc < p.arrUtc) {
         note('return flight departs before the outbound flight lands, but no error is shown',
-          `outbound lands ${new Date(p.arrUtc).toISOString()}, return leaves ${new Date(back.depUtc).toISOString()}`, repro);
+          `Outbound lands ${new Date(p.arrUtc).toISOString()}; return leaves ${new Date(back.depUtc).toISOString()}. The return plan is built anyway.`, repro);
       }
     }
 
     try {
-      const events = sleepEvents(p, back);
-      for (const [name, detail] of icsProblems(icsText(events), events)) note(name, detail, repro);
-      for (const e of events.slice(0, 2)) if (googleUrl(e).length > 2000) note('Google Calendar link longer than 2,000 characters', '', repro);
+      const ev = sleepEvents(p, back);
+      events += ev.length;
+      for (const [name, detail] of icsProblems(icsText(ev), ev)) note(name, detail, repro);
+      for (const e of ev.slice(0, 2)) if (googleUrl(e).length > 2000) note('Google Calendar link longer than 2,000 characters', '', repro);
     } catch (e) {
       note('calendar export throws', e.message, repro);
     }
@@ -300,17 +381,25 @@ export async function runModel(r, { docs, seed, cases }) {
     } catch (e) {
       note('planText throws', e.message, repro);
     }
+    if (!tripHit) clean++;
   }
+  const pct = (n) => (n / cases * 100).toFixed(n / cases < 0.01 ? 2 : 1) + '%';
+  r.stat(`${clean.toLocaleString('en-US')} of ${cases.toLocaleString('en-US')} random trips passed every plan, calendar and text check (warnings aside); ${withReturn.toLocaleString('en-US')} had a return plan; ${events.toLocaleString('en-US')} calendar events built.`);
   if (!found.size) r.pass(`All ${cases} random trips passed every plan, calendar and text check`);
-  const order = [...found.entries()].sort((a, b) => b[1].count - a[1].count);
-  for (const [name, f] of order) {
-    const lvl = WARN_ONLY.test(name) ? 'warn' : 'fail';
-    r.add(lvl, `${name} (${f.count} of ${cases} trips)`, f.detail, f.repro);
+  for (const [name, f] of [...found.entries()].sort((a, b) => b[1].count - a[1].count)) {
+    const m = metaFor(name);
+    r.add(WARN_ONLY.test(name) ? 'warn' : 'fail', m.title || name, f.detail, f.repro, {
+      check: m.check, where: m.where, expected: m.expected,
+      steps: 'Enter this trip: ' + describeTrip(f.repro.trip) + (Object.keys(f.repro.logs || {}).length ? ' Sleep logs are in the replay JSON.' : ''),
+      actual: (m.actual ? m.actual + ' ' : '') + f.detail,
+      evidence: `Found in ${f.count.toLocaleString('en-US')} of ${cases.toLocaleString('en-US')} random trips (${pct(f.count)}), seed ${seed}. The simplest case is below.`,
+      count: f.count,
+    });
   }
   if (crashes) r.fail(`${crashes} trips crashed the model`);
 
   // ---------- Hand-picked edge cases ----------
-  r.start('Plan model edge cases');
+  r.start('Plan model edge cases', CHECKS.edge);
   const base = { ...TRIP_DEFAULTS, home: 'code:JFK', dest: 'code:LHR', depDate: '2027-06-10' };
   const edges = [
     ['same city', { dest: 'code:JFK' }],
@@ -327,7 +416,7 @@ export async function runModel(r, { docs, seed, cases }) {
     ['every option at its limit', { preDays: 3, pace: 1.5, chrono: 'lark', cups: 6, caffSens: 'high', dest: 'code:SYD' }],
     ['slowest pace, 12 h shift', { pace: 0.5, dest: 'code:SIN', strategy: 'gradual' }],
     ['empty sleep log values', { }, { 1: { bed: '', wake: '' }, 2: { bed: '25:99', wake: 'x' } }],
-    ['negative trip length typed in (the form has novalidate)', { tripDays: -4, dest: 'code:NRT' }],
+    ['negative trip length typed in', { tripDays: -4, dest: 'code:NRT' }],
     ['out-of-range numbers typed in', { durH: 30, durM: 999, cups: 99, alcohol: -2, preDays: 9, pace: 0 }],
     ['missing date (cleared field)', { depDate: '' }],
     ['unknown location key', { dest: 'code:ZZZ' }],
@@ -335,8 +424,10 @@ export async function runModel(r, { docs, seed, cases }) {
     ['return before arrival date', { ret: true, retDate: '2027-06-01', retTime: '10:00' }],
     ['return with no date', { ret: true, retDate: null }],
   ];
+  let edgeOk = 0;
   for (const [label, patch, logs, post] of edges) {
     let trip = { ...base, ...patch };
+    const steps = () => 'Enter this trip: ' + describeTrip(trip) + (logs ? ' Log nights with ' + JSON.stringify(logs) + '.' : '');
     try {
       let p = buildPlan(trip, logs || {});
       if (post) { trip = post(trip, p); p = buildPlan(trip, logs || {}); }
@@ -347,16 +438,32 @@ export async function runModel(r, { docs, seed, cases }) {
       const text = planText(p, back);
       const m = text.match(TEXT_JUNK);
       if (m) probs.push(['shared text shows a placeholder value', `"${m[0]}"`]);
-      if (probs.length) r.add(probs.every(([n]) => WARN_ONLY.test(n)) ? 'warn' : 'fail', label, probs.map(([n, d]) => `• ${n}${d ? ': ' + d : ''}`).join('\n'), { trip, logs });
-      else r.pass(label);
+      if (!probs.length) { edgeOk++; r.pass(label); continue; }
+      const first = metaFor(probs[0][0]);
+      const noDays = probs.some(([n]) => n === 'plan has no days');
+      const Label = label[0].toUpperCase() + label.slice(1);
+      const listed = probs.map(([n, d]) => `• ${n}${d ? ': ' + d : ''}`);
+      r.add(probs.every(([n]) => WARN_ONLY.test(n)) ? 'warn' : 'fail', `${Label}: ${first.title || probs[0][0]}`,
+        listed.length === 1 ? listed[0].slice(2) : listed.join('\n'), { trip, logs }, {
+          where: noDays ? 'docs/js/core/model.js:216 (`minDays`), docs/js/ui/plan-view.js:38 (`p.days[0]`), docs/index.html:165 (`novalidate`)' : first.where,
+          steps: steps(),
+          expected: noDays ? 'Trip length below 1 is rejected or treated as 1, and the plan has at least one day.' : first.expected,
+          evidence: noDays ? 'buildPlan returns days: []. In the browser the same input throws "Cannot read properties of undefined (reading \'bed\')" in renderSummary (see 5. Edge cases, browser).' : 'Reproduced with the hand-picked trip below.',
+        });
     } catch (e) {
       const lvl = label.startsWith('missing date') ? 'warn' : 'fail';
-      r.add(lvl, `${label}: throws ${e.name}`, e.message + (lvl === 'warn' ? '\nOnly reachable through saved data (the form ignores a cleared date). main.js catches it, but the page then shows no plan and no message.' : ''), { trip });
+      r.add(lvl, `${label[0].toUpperCase() + label.slice(1)}: buildPlan throws ${e.name}`, e.message, { trip }, {
+        where: 'docs/js/lib/time.js (`zonedToUtc`), docs/js/main.js (`render`)', steps: steps(),
+        expected: 'A message asking for a date, or the last good plan kept with a note.',
+        actual: `buildPlan throws "${e.message}". main.js catches it, so the page shows no new plan and no message.` + (lvl === 'warn' ? ' Only reachable through saved data, because the form ignores a cleared date.' : ''),
+        confidence: lvl === 'warn' ? 'Likely' : 'Confirmed',
+      });
     }
   }
+  r.stat(`${edgeOk} of ${edges.length} hand-picked edge-case trips passed.`);
 
   // ---------- Time zone math ----------
-  r.start('Time zone math');
+  r.start('Time zone math', CHECKS.data);
   const zones = allTimeZones();
   const tzProblems = [];
   const offsetProblems = [];
@@ -390,7 +497,7 @@ export async function runModel(r, { docs, seed, cases }) {
   r.check('fail', 'tzOffset agrees with Intl in every sampled zone', offsetProblems);
 
   // ---------- Interval math ----------
-  r.start('Interval math');
+  r.start('Interval math', CHECKS.plan);
   const ivProblems = [];
   const IR = rng(seed + 2);
   for (let i = 0; i < 3000; i++) {
@@ -408,7 +515,7 @@ export async function runModel(r, { docs, seed, cases }) {
   r.check('fail', 'subtractDaily and toDayPieces match a brute-force check on 3,000 random intervals', ivProblems);
 
   // ---------- Holidays and seasons ----------
-  r.start('Holidays and seasons');
+  r.start('Holidays and seasons', CHECKS.data);
   const known = { easter: { 2025: '04-20', 2026: '04-05', 2027: '03-28', 2030: '04-21', 2038: '04-25' }, thanksgiving: { 2025: '11-27', 2026: '11-26', 2027: '11-25', 2030: '11-28' } };
   const hol = [];
   for (const [y, md] of Object.entries(known.easter)) if (new Date(cal.easterDate(+y)).toISOString().slice(5, 10) !== md) hol.push(`Easter ${y}`);
@@ -449,7 +556,7 @@ export async function runModel(r, { docs, seed, cases }) {
   r.check('fail', 'Hemisphere detection for well-known zones', hemi);
 
   // ---------- Location data and search ----------
-  r.start('Location data and search');
+  r.start('Location data and search', CHECKS.data);
   const codes = LOCATIONS.map((l) => l.code);
   const dup = [...new Set(codes.filter((c, i) => codes.indexOf(c) !== i))];
   r.check('fail', `Airport codes are unique across ${LOCATIONS.length} airports`, dup);
@@ -482,4 +589,47 @@ export async function runModel(r, { docs, seed, cases }) {
     } catch (e) { parse.push(`${k}: ${e.message}`); }
   }
   r.check('warn', 'parseLoc handles current, legacy and broken keys without throwing', parse);
+
+  // ---------- README claims ----------
+  r.start('README claims', CHECKS.readme);
+  const { readFileSync } = await import('node:fs');
+  const readme = readFileSync(join(docs, '..', 'README.md'), 'utf8');
+  const { AIRPORTS } = await imp('js/data/airports.js');
+  const lines = readme.split('\n');
+  const claims = [];
+  let held = 0;
+  const claim = (quote, ok, actual) => {
+    const line = lines.findIndex((l) => l.includes(quote)) + 1;
+    if (!line) claims.push({ quote, line: 0, actual: 'the README no longer says this; update the check in tools/qc/model-hunt.mjs' });
+    else if (!ok) claims.push({ quote, line, actual });
+    else held++;
+  };
+  claim('About 3,100 airports are built in', Math.abs(LOCATIONS.length - 3100) <= 150, `the app has ${LOCATIONS.length.toLocaleString('en-US')}`);
+  claim('230 hand-picked major airports', Math.abs(AIRPORTS.length - 230) <= 10, `the curated list has ${AIRPORTS.length}`);
+  claim('about 1 hour per day when advancing (flying east) and 1.5 hours per day when delaying', MODEL.advanceRate === 1 && MODEL.delayRate === 1.5, `MODEL has ${MODEL.advanceRate} and ${MODEL.delayRate}`);
+  claim('about 3 hours before your body\'s natural wake time', MODEL.tminBeforeWake === 3, `tminBeforeWake is ${MODEL.tminBeforeWake}`);
+  claim('pre-adjust up to 3 days', buildPlan({ ...base, preDays: 9, dest: 'code:SYD' }).pre.length <= 3, 'more than 3 pre-adjust days are planned');
+  const icsSrc = readFileSync(join(docs, 'js/ui/ics.js'), 'utf8');
+  claim('alert 15 minutes before bedtime', /ALERT_MINUTES = 15\b/.test(icsSrc), 'ALERT_MINUTES is not 15');
+  const lastYear = Math.min(...[themes.LUNAR_NEW_YEAR, themes.DIWALI, themes.HANUKKAH].map((t) => Math.max(...Object.keys(t).map(Number))));
+  claim('Lunar New Year, Diwali, and Hanukkah dates extended through 2036', lastYear === 2036, `the tables end in ${lastYear}`);
+  const shortTrip = buildPlan({ ...base, tripDays: MODEL.shortTripDays, dest: 'code:NRT' });
+  claim('a trip kept on home time needs little recovery', shortTrip.strategy === 'home', `a ${MODEL.shortTripDays}-day trip to Tokyo uses "${shortTrip.strategy}"`);
+  const tromso = searchLocations('tromso')[0];
+  claim('"tromso" finds Tromsø', tromso && /Troms/.test(tromso.city), `top result is ${tromso && tromso.label}`);
+  const pago = searchLocations('pago pago')[0];
+  claim('"Pago Pago (UTC−11)"', pago && pago.label === 'Pago Pago (UTC−11)', `label is "${pago && pago.label}"`);
+  for (const c of claims) {
+    const q = c.quote.startsWith('"') ? c.quote : `"${c.quote}"`;
+    r.fail(`README says ${q}, but ${c.actual}`, '', null, {
+      where: c.line ? `README.md:${c.line}` : 'tools/qc/model-hunt.mjs (README claims)',
+      steps: 'Compare the README line with the app data and a plan built from it.',
+      expected: `The app matches the README: ${q}.`,
+      actual: c.actual[0].toUpperCase() + c.actual.slice(1) + '.',
+      evidence: 'Tested against the code by the script.',
+    });
+  }
+  if (!claims.length) r.pass('Concrete README claims match the app (airport counts, shift rates, pre-adjust, alerts, holidays, search)');
+  const n = held;
+  r.stat(`${n} of ${held + claims.length} README claims tested by the script hold.`);
 }

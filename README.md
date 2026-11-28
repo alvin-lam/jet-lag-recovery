@@ -111,6 +111,7 @@ tools/qc/static-checks.mjs              Offline cache list, cache bump, imports,
 tools/qc/model-hunt.mjs                 Fuzzes the plan model with seeded random trips, plus time zone, interval, holiday and search checks
 tools/qc/browser-hunt.mjs               Drives the app in headless Chromium: errors, CSP, broken text, overflow, dialogs, offline
 tools/qc/report.mjs                     Prints findings and writes the Markdown report
+.claude/agents/qc-bug-hunter.md         Claude Code agent for an on-demand QC pass; writes the same report
 ```
 
 ### Data design
@@ -160,7 +161,11 @@ It runs three passes and writes `qc-report.md` at the repository root (ignored b
 - **Model fuzzing:** thousands of seeded random trips (daylight saving dates, odd time zones, every option) checked against invariants. For example, light advice never falls during sleep, coffee stays before the cutoff, calendar events do not overlap, and shared text never shows `NaN` or `undefined`. Time zone math, interval math, holiday dates and search ranking are checked as well.
 - **Browser hunt:** the real app in headless Chromium on desktop and phone, in several regions and both color modes. It records uncaught errors, CSP violations, failed requests, placeholder text, sideways scrolling and missing labels. It also exercises the disclaimer, tabs, calendar and share dialogs, search, odd form input and offline reload.
 
-Useful options: `--quick` (no browser, short fuzz run), `--only static,model`, `--cases 20000`, `--seed 42` to replay a run exactly, `--screens` to save screenshots to `test-results/qc-screens/`, and `--strict` to fail on warnings. Each finding in the report includes the trip that triggers it. The command exits with an error when anything fails.
+Useful options: `--quick` (no browser, short fuzz run), `--only static,model`, `--cases 20000`, `--seed 42` to replay a run exactly, `--screens` to save screenshots to `test-results/qc-screens/`, and `--strict` to fail on warnings. The command exits with an error when anything fails.
+
+The report uses the same layout as the points-calculator QC & Bug Hunter. Findings sit under seven numbered checks: display, plan calculation, time zones and data, calendar and sharing, edge cases, offline and release, and README accuracy. Each finding gives where it is, the steps to trigger it, the expected and actual results, the evidence and a confidence of "Confirmed" or "Likely". The report ends with a "Could not verify" list and a summary of what passed.
+
+For a deeper review, ask Claude Code for a QC pass. The `qc-bug-hunter` agent in `.claude/agents/qc-bug-hunter.md` runs the script, confirms each finding, then checks by hand what a script cannot: the plan against the published rules, upcoming time zone and holiday date changes, calendar imports, and every README claim. It writes the same report and never changes the repository.
 
 ### Showing the disclaimer again
 
