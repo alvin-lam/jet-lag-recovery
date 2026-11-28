@@ -605,7 +605,8 @@ export async function runModel(r, { docs, seed, cases }) {
     else held++;
   };
   claim('About 3,100 airports are built in', Math.abs(LOCATIONS.length - 3100) <= 150, `the app has ${LOCATIONS.length.toLocaleString('en-US')}`);
-  claim('230 hand-picked major airports', Math.abs(AIRPORTS.length - 230) <= 10, `the curated list has ${AIRPORTS.length}`);
+  const curatedClaim = (readme.match(/(\d[\d,]*) hand-picked major airports/) || [])[1] || '0';
+  claim(`${curatedClaim} hand-picked major airports`, Math.abs(AIRPORTS.length - Number(curatedClaim.replace(/,/g, ''))) <= 10, `the curated list has ${AIRPORTS.length}`);
   claim('about 1 hour per day when advancing (flying east) and 1.5 hours per day when delaying', MODEL.advanceRate === 1 && MODEL.delayRate === 1.5, `MODEL has ${MODEL.advanceRate} and ${MODEL.delayRate}`);
   claim('about 3 hours before your body\'s natural wake time', MODEL.tminBeforeWake === 3, `tminBeforeWake is ${MODEL.tminBeforeWake}`);
   claim('pre-adjust up to 3 days', buildPlan({ ...base, preDays: 9, dest: 'code:SYD' }).pre.length <= 3, 'more than 3 pre-adjust days are planned');
@@ -617,8 +618,10 @@ export async function runModel(r, { docs, seed, cases }) {
   claim('a trip kept on home time needs little recovery', shortTrip.strategy === 'home', `a ${MODEL.shortTripDays}-day trip to Tokyo uses "${shortTrip.strategy}"`);
   const tromso = searchLocations('tromso')[0];
   claim('"tromso" finds Tromsø', tromso && /Troms/.test(tromso.city), `top result is ${tromso && tromso.label}`);
-  const pago = searchLocations('pago pago')[0];
-  claim('"Pago Pago (UTC−11)"', pago && pago.label === 'Pago Pago (UTC−11)', `label is "${pago && pago.label}"`);
+  // The README's example of a place with no listed airport, shown with its UTC offset.
+  const example = (readme.match(/for example "([^"(]+) \((UTC[^)]*)\)"/) || []);
+  const place = example[1] && searchLocations(example[1])[0];
+  claim(example[0] ? example[0].replace('for example ', '') : 'for example "Place (UTC±N)"', place && place.label === `${example[1]} (${example[2]})`, `label is "${place && place.label}"`);
   for (const c of claims) {
     const q = c.quote.startsWith('"') ? c.quote : `"${c.quote}"`;
     r.fail(`README says ${q}, but ${c.actual}`, '', null, {

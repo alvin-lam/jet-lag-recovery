@@ -3,6 +3,7 @@
 // (Mail, Gmail, Outlook...) where it supports files, and otherwise saves the image to attach by hand.
 import { $ } from '../lib/util.js';
 import { toDayPieces } from '../lib/intervals.js';
+import { daysBeforeReturn } from '../core/model.js';
 import { fmtDate, fmtTime, fmtRange, fmtRanges, fmtHours } from './format.js';
 import { openDialog, closeDialog } from './dialog.js';
 
@@ -23,7 +24,7 @@ export function planText(p, back) {
   }
   out.push(`Flight: arrive ${fmtDate(p.arrDate)} at ${fmtTime(p.arrHour)} ${p.dest.name} time.`, '');
   const days = (plan, label) => {
-    for (const d of plan.days) {
+    for (const d of plan === p ? daysBeforeReturn(p, back) : plan.days) {
       out.push(`${fmtDate(d.date)} (${label}${plan.dest.name} time)`,
         `  Wake ${fmtTime(d.wake)}, bed ${fmtTime(d.bed)}`,
         ...(d.seek?.length ? [`  Bright light ${fmtRanges(d.seek)}`] : []),
@@ -44,7 +45,7 @@ export function planImage(p, back) {
   const color = { sleep: c('--sleep', '#4b4fa8'), light: c('--light', '#f2b705'), dark: c('--dark', '#7b8494'), caff: c('--caff', '#8a5a36') };
   const rows = [
     ...p.pre.map((d) => ({ date: d.date, place: p.home.name, sleep: [[d.bed, d.bed + p.sleepLen]], seek: d.light ? [d.light.seek] : [], avoid: d.light ? [d.light.avoid] : [], caff: [[d.wake, d.caffCutoff]] })),
-    ...[p, ...(back && !back.error ? [back] : [])].flatMap((plan) => plan.days.map((d) => ({
+    ...[p, ...(back && !back.error ? [back] : [])].flatMap((plan) => (plan === p ? daysBeforeReturn(p, back) : plan.days).map((d) => ({
       date: d.date, place: plan.dest.name,
       sleep: [[d.bed, d.bed + d.night], ...(d.arrivalSleep ? [d.arrivalSleep] : [])],
       seek: d.light ? [d.light.seek] : [], avoid: d.light ? [d.light.avoid] : [],

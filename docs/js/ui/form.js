@@ -33,6 +33,14 @@ export function setupForm({ onChange }) {
     if (NUMERIC.has(t.name)) {
       v = Number(v);
       if (!Number.isFinite(v)) return;
+      // The form has novalidate, so keep numbers inside the field's own range. While typing, the plan
+      // uses the nearest allowed value; on leaving the field, the field shows it too.
+      const lo = t.min === '' ? -Infinity : Number(t.min);
+      const hi = t.max === '' ? Infinity : Number(t.max);
+      if (v < lo || v > hi) {
+        v = Math.min(hi, Math.max(lo, v));
+        if (e.type === 'change') t.value = v;
+      }
     }
     if (v === store.trip[t.name]) return; // input and change both fire; skip duplicates
     const patch = { [t.name]: v };

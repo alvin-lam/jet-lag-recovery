@@ -1,6 +1,6 @@
 // Export planned sleep windows as an iCalendar (.ics) file. Times are written in UTC.
 import { mod24, pad, quarter } from '../lib/util.js';
-import { zonedToUtc, addDays } from '../lib/time.js';
+import { zonedToUtc, addDays, localDateStr } from '../lib/time.js';
 import { fmtTime } from './format.js';
 
 const HOUR_MS = 3600000;
@@ -14,9 +14,18 @@ function stamp(ms) {
 
 const escText = (s) => s.replace(/[\\,;]/g, '\\$&');
 
-// A bedtime before noon belongs to the early hours of the next calendar day.
-function sleepStart(date, bed, tz) {
-  return zonedToUtc(mod24(bed) < 12 ? addDays(date, 1) : date, mod24(quarter(bed)), tz);
+const AWAKE_MIN_MS = 2 * HOUR_MS; // the shortest time awake between two nights
+
+/**
+ * The first moment after `after` when the clock in `tz` reads `bed` (rounded to the quarter hour).
+ * Nights are placed one after another this way, so they never overlap and never skip a day, whatever
+ * the traveler's sleep times (late sleepers, daytime sleepers, and bedtimes that cross midnight).
+ */
+function nextBedtime(after, bed, tz) {
+  const h = mod24(quarter(bed));
+  const date = localDateStr(tz, after);
+  const today = zonedToUtc(date, h, tz);
+  return today > after ? today : zonedToUtc(addDays(date, 1), h, tz);
 }
 
 const ALERT_MINUTES = 15; // every event reminds the traveler shortly before bedtime
@@ -29,16 +38,34 @@ const ALERT_MINUTES = 15; // every event reminds the traveler shortly before bed
 export function sleepEvents(p, back) {
   const events = [];
   const add = (start, hours, title, details, tz, place) => events.push({ start, end: start + hours * HOUR_MS, title, details: details + ' ' + NOTE, tz, place });
+  // Before departure: the first night follows midday of its date; each later night follows the last.
+  // A night before an early-morning flight ends when the flight leaves.
+  let after = p.pre.length ? zonedToUtc(p.pre[0].date, 12, p.home.tz) : 0;
   for (const d of p.pre) {
-    add(sleepStart(d.date, d.bed, p.home.tz), p.sleepLen, 'Sleep (jet lag prep)', 'Jet Lag & Recovery: pre-flight shift.', p.home.tz, p.home.name);
+    const start = nextBedtime(after, d.bed, p.home.tz);
+    const hours = Math.min(p.sleepLen, (p.depUtc - start) / HOUR_MS);
+    after = start + Math.max(hours, 0) * HOUR_MS + AWAKE_MIN_MS;
+    if (hours >= 1) add(start, hours, 'Sleep (jet lag prep)', 'Jet Lag & Recovery: pre-flight shift.', p.home.tz, p.home.name);
   }
+  // At the destination: the first night follows landing. With a return flight, these nights stop
+  // when it leaves; the nights after that are back home.
+  const leaves = back && !back.error ? back.depUtc : Infinity;
+  after = p.arrUtc;
   for (const d of p.days) {
-    add(sleepStart(d.date, d.bed, p.dest.tz), d.night || p.sleepLen, 'Sleep in ' + p.dest.name,
+    const start = nextBedtime(after, d.bed, p.dest.tz);
+    const hours = Math.min(d.night || p.sleepLen, (leaves - start) / HOUR_MS);
+    if (hours < 1) break;
+    after = start + hours * HOUR_MS + AWAKE_MIN_MS;
+    add(start, hours, 'Sleep in ' + p.dest.name,
       `Jet Lag & Recovery: last caffeine ${fmtTime(d.caff.cutoff)}.`, p.dest.tz, p.dest.name);
   }
   if (back && !back.error) {
+    after = back.arrUtc;
     for (const d of back.days) {
-      add(sleepStart(d.date, d.bed, back.dest.tz), d.night || back.sleepLen, 'Sleep (back home in ' + back.dest.name + ')',
+      const start = nextBedtime(after, d.bed, back.dest.tz);
+      const hours = d.night || back.sleepLen;
+      after = start + hours * HOUR_MS + AWAKE_MIN_MS;
+      add(start, hours, 'Sleep (back home in ' + back.dest.name + ')',
         `Jet Lag & Recovery, return trip: last caffeine ${fmtTime(d.caff.cutoff)}.`, back.dest.tz, back.dest.name);
     }
   }

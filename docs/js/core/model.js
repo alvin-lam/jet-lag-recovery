@@ -141,8 +141,9 @@ export function buildPlan(trip, nights = {}, opts = {}) {
   const homeBed = hm(trip.bed);
   const homeWake = hm(trip.wake);
   const sleepLen = mod24(homeWake - homeBed) || 8;
-  const durH = Math.max(0, (Number(trip.durH) || 0) + (Number(trip.durM) || 0) / 60);
-  const tripDays = Number(trip.tripDays) || 7;
+  // The form does not enforce its min and max, so keep typed values in range here.
+  const durH = clamp(Number(trip.durH) || 0, 0, 23) + clamp(Number(trip.durM) || 0, 0, 59) / 60;
+  const tripDays = clamp(Math.round(Number(trip.tripDays) || 7), 1, 90);
 
   // Instants and offsets (DST-aware, evaluated on the travel dates).
   const depUtc = zonedToUtc(trip.depDate, hm(trip.depTime), home.tz);
@@ -194,12 +195,14 @@ export function buildPlan(trip, nights = {}, opts = {}) {
     const wake = homeWake - P;
     const light = lightWindows(wake, sign);
     pre.push({
-      date: addDays(trip.depDate, j - preDays - 1), bed, wake, light,
+      bed, wake, light,
       seek: awakeLight(light.seek, bed, sleepLen),
       avoid: awakeLight(light.avoid, bed, sleepLen),
       caffCutoff: cutoffAfter(wake, bed, caffCut),
     });
   }
+  // A small shift can need fewer nights than chosen. Those nights still end the night before departure.
+  pre.forEach((d, i) => { d.date = addDays(trip.depDate, i - pre.length); });
   const P0 = P;
 
   // ---------- Flight ----------
@@ -248,7 +251,8 @@ export function buildPlan(trip, nights = {}, opts = {}) {
     // Evening landing: tonight's bedtime moves to soon after landing.
     // After-midnight landing: sleep from soon after landing until wake time, then the day runs as usual.
     let arrivalSleep = null;
-    if (landsAtNight && arrHour + 1 < wake) arrivalSleep = [arrHour + 1, wake];
+    const wakeClock = wake >= 24 ? wake - 24 : wake; // staying on home time can put wake past 24
+    if (landsAtNight && arrHour + 1 < wakeClock) arrivalSleep = [arrHour + 1, wakeClock];
     const lateArrival = landsAtNight && !arrivalSleep;
     if (lateArrival) bed = arrHour + 1;
 
@@ -342,8 +346,16 @@ export function buildReturnPlan(trip, outbound, nights = {}) {
     preDays: 0,
   };
   const plan = buildPlan(back, nights, { bodyShift: -moved });
+  if (plan.depUtc < outbound.arrUtc) return { error: 'The return flight leaves before you land. Choose a later date or time.' };
   plan.isReturn = true;
   plan.adjustedBeforeReturn = Math.abs(moved);
   plan.outboundShift = Math.abs(outbound.target);
   return plan;
+}
+
+/** Outbound days that start before the return flight leaves. Later days are spent at home, on the return plan. */
+export function daysBeforeReturn(p, back) {
+  if (!back || back.error) return p.days;
+  const leaves = localDateStr(p.dest.tz, back.depUtc);
+  return p.days.filter((d) => d.date < leaves || (d.date === leaves && d.k === 1));
 }
