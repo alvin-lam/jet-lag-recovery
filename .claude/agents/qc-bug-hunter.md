@@ -149,17 +149,41 @@ matches, with the README line and what the app actually does.
 
 ## Report
 
-Write the report in the same layout as `qc-report.md`. Group findings
-under the seven check headings. Within each group, rank from most to least
-severe. For each finding give:
-- the file and line (`path:line`) or the page and control;
-- the steps or input that trigger it;
-- the expected result and the actual result;
-- the evidence: a run, a screenshot path, or a quoted source with URL;
-- confidence: "Confirmed" (reproduced) or "Likely" (from reading code or a
-  source).
+Return the report as text that the main session turns into a private report
+page with the Artifact tool, in the same layout as the Points Calculator QC
+Report. When a QC report page from an earlier run exists, the main session
+updates that page, so its link stays the same. Write it in this order:
 
-Leave out style opinions. Then add a "Could not verify" list and a short
-summary of what passed, for example "4,512 of 5,000 random trips passed
-every check". Finally, stop the web server and delete the temporary
-directory.
+1. **Header:** "Quality check · <date>", the title "Jet Lag & Recovery QC
+   Report", and one line naming the branch, the commit and the script seed.
+2. **tl;dr** in three short lists:
+   - **What is working:** the main things that passed, with numbers, for
+     example "4,289 of 5,000 random trips passed every check".
+   - **What is not working:** one line per real problem, most severe first,
+     in plain words a traveler would understand.
+   - **What you need to do:** a numbered list of the actions only a person
+     can take. Examples: approve fixes, decide a design question, approve
+     legal or privacy wording, check a blocked site, test on a real device,
+     and share the report.
+3. **Stat tiles:** six numbers, such as random trips with no bug, console
+   errors, files cached offline, app bugs, and README lines out of date.
+4. **Fix these first:** a numbered list. Each row has a severity (High,
+   Medium or Low), a bold title and one sentence.
+5. **One section per check (1 to 7).** Each finding gives:
+   - the severity, a short title and the confidence: "Confirmed"
+     (reproduced) or "Likely" (from reading code or a source);
+   - Where: the file and line (`path:line`) or the page and control;
+   - Steps: what a person types or clicks, using well-known airports;
+   - Expected and Actual;
+   - a screenshot of the real app for every High or Medium app bug, saved in
+     the temporary directory.
+   Use tables for "Coming soon" changes (Place | Change | When | Source)
+   and for README mismatches (Line | README says | The app actually). End
+   each section with a short "Passed" list.
+6. **Could not verify:** blocked sites, untested browsers, and anything that
+   needs a sleep specialist or a lawyer.
+
+Leave out style opinions. Do not list a script finding you could not
+confirm; put it under "Could not verify" with the reason. Finally, stop
+the web server and delete the temporary directory, but keep the screenshot
+files until the main session has published the page.
