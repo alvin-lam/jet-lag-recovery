@@ -106,6 +106,11 @@ docs/js/ui/share.js                     Share to: email with graphs, email as pl
 README.md                               This file
 design/icon-source.png                  Full-size original of the app icon; the icons in docs/assets/img/ are generated from it
 tools/build-airports.py                 Builds docs/js/data/airports-world.js from the airport data sources
+tools/qc/run.mjs                        QC & Bug Hunter: runs the checks below and writes qc-report.md
+tools/qc/static-checks.mjs              Offline cache list, cache bump, imports, HTML, CSP, manifest, domain, README tree
+tools/qc/model-hunt.mjs                 Fuzzes the plan model with seeded random trips, plus time zone, interval, holiday and search checks
+tools/qc/browser-hunt.mjs               Drives the app in headless Chromium: errors, CSP, broken text, overflow, dialogs, offline
+tools/qc/report.mjs                     Prints findings and writes the Markdown report
 ```
 
 ### Data design
@@ -141,6 +146,22 @@ python3 tools/build-airports.py path/to/airports.csv path/to/airports.json
 
 The script keeps airports with scheduled passenger service and skips codes already in the hand-picked list. It checks every time zone against the system time zone database and reports any zone that looks wrong for the airport's country or longitude. Fix those in `TZ_FIX` inside the script.
 
+### Checking for bugs (QC & Bug Hunter)
+
+Run the QC & Bug Hunter before opening a pull request. It needs only Node 18 or later. The browser checks also need Playwright; without it they are skipped.
+
+```sh
+node tools/qc/run.mjs
+```
+
+It runs three passes and writes `qc-report.md` at the repository root (ignored by git):
+
+- **Static checks:** every cached file is in the `sw.js` `ASSETS` list, `CACHE` was bumped when a cached file changed since `origin/prod`, imports resolve to real exports, there are no inline styles or scripts the CSP would block, every `#id` the scripts use exists, the manifest icons match their sizes, self URLs match `docs/CNAME`, and the README project tree matches `docs/`.
+- **Model fuzzing:** thousands of seeded random trips (daylight saving dates, odd time zones, every option) checked against invariants. For example, light advice never falls during sleep, coffee stays before the cutoff, calendar events do not overlap, and shared text never shows `NaN` or `undefined`. Time zone math, interval math, holiday dates and search ranking are checked as well.
+- **Browser hunt:** the real app in headless Chromium on desktop and phone, in several regions and both color modes. It records uncaught errors, CSP violations, failed requests, placeholder text, sideways scrolling and missing labels. It also exercises the disclaimer, tabs, calendar and share dialogs, search, odd form input and offline reload.
+
+Useful options: `--quick` (no browser, short fuzz run), `--only static,model`, `--cases 20000`, `--seed 42` to replay a run exactly, `--screens` to save screenshots to `test-results/qc-screens/`, and `--strict` to fail on warnings. Each finding in the report includes the trip that triggers it. The command exits with an error when anything fails.
+
 ### Showing the disclaimer again
 
 Increase `DISCLAIMER_VERSION` in `docs/js/config.js` when the disclaimer changes. Every visitor then sees the dialog again and must acknowledge it.
@@ -160,6 +181,7 @@ When any cached file changes, bump the cache name (`CACHE`) in `docs/sw.js` so i
 - The Instrument Serif font is self-hosted, and the page makes no third-party requests.
 - Saved data is checked on load: only known keys are kept, so stale or tampered storage cannot add unexpected fields.
 - Development files (`design/`, `tools/`) are not published.
+- Run `node tools/qc/run.mjs` before release; it flags CSP-blocked markup and an unbumped cache name.
 
 ### Headers to set in Cloudflare
 
